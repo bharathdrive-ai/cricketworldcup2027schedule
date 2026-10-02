@@ -226,8 +226,7 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
 .benchg.atv .bench{stroke-width:4}
 .cat-team,.cat-venue{--sv:var(--accent);--sv-soft:var(--sunk)}
-.catg .bench{stroke-dasharray:6 3}
-.catg.sel .bench{fill:var(--sv);stroke-dasharray:none}
+.catg.sel .bench{fill:var(--sv)}
 .catg.sel .btxt{fill:var(--surface)}
 .mcard{display:grid;gap:4px;padding:10px 12px;border-radius:4px;background:var(--sv-soft);border-left:4px solid var(--sv)}
 .mcard b{font-size:16px}
@@ -842,7 +841,7 @@ function detailHTML(list){
   if(!c){
     const sel=[...state.venues];
     return `<h3>Venues</h3><p class="meta">Hover or tap a pin to see its matches. Click a pin to add or remove that venue from your selection.</p>
-      <p class="meta">Each solid bench in the stands is one match, in date order clockwise from the top. Tap it for details. The dashed benches after them are stages, venues and teams: tap one to filter.</p>
+      <p class="meta">Each bench in the stands is one match, in date order clockwise from the top. Tap it for details. The benches after the matches, in capitals, are stages, venues and teams: tap one to filter.</p>
       <p class="meta">${sel.length?`Selected: <b>${sel.map(esc).join(", ")}</b>`:"No venues selected, so every ground is shown."}</p>
       <p class="meta">Pick a single team on the Teams tab to draw its travel route.</p>`;
   }
