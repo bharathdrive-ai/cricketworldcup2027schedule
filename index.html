@@ -710,9 +710,9 @@ function benchesSVG(){
       // section header in its own slot: radial text at the wide outer end, divider lines either side
       const [h0,h1] = it._d, hm=(h0+h1)/2, A=((hm%360)+360)%360, flip = A>90 && A<270;
       const arcH = (h1-h0)*Math.PI/180*(RO[0]-15), FH = Math.min(22, arcH*0.7/1.15, depth*0.92/(0.62*it.header.length));
-      const pos = ept(RO[0]-8, RO[1]-8, hm), rot = hm + (flip ? 180 : 0);
+      const pos = ept((RI[0]+RO[0])/2, (RI[1]+RO[1])/2, hm), rot = hm + (flip ? 180 : 0);
       const tick = d => { const a=ept(RI[0],RI[1],d), b=ept(RO[0],RO[1],d); return `M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}`; };
-      return `<g class="bhead" aria-hidden="true"><path class="bhead-rule" d="${tick(h0)}${tick(h1)}"></path><text transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="${flip?"start":"end"}" y="${f1(0.35*FH)}" style="font-size:${f1(FH)}px">${it.header}</text></g>`;
+      return `<g class="bhead" aria-hidden="true"><path class="bhead-rule" d="${tick(h0)}${tick(h1)}"></path><text transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*FH)}" style="font-size:${f1(FH)}px">${it.header}</text></g>`;
     }
     let [d0,d1] = it._d; const span=d1-d0, gap=Math.min(0.25, span*0.06); d0+=gap; d1-=gap;
     const large = d1-d0>180?1:0, o0=ept(RO[0],RO[1],d0), o1=ept(RO[0],RO[1],d1), i1=ept(RI[0],RI[1],d1), i0=ept(RI[0],RI[1],d0);
@@ -742,7 +742,7 @@ function benchesSVG(){
     const flip = tan ? (A>0 && A<180) : (A>90 && A<270);
     if(flip) rot += 180;
     // radial: anchor the text just inside the outer edge (bench is widest there); along-bench: centre it
-    const pos = tan ? mid : ept(RO[0]-8, RO[1]-8, am), anc = tan ? "middle" : (flip ? "start" : "end");
+    const pos = mid, anc = "middle"; // centred along the bench
     return `<g class="${cls}" ${attrs} tabindex="0" role="button" aria-label="${esc(label)}">
       <path class="bench" d="${path}"><title>${esc(label)}</title></path>
       <text class="btxt" transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="${anc}" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.45em">${esc(second)}</tspan></text>
