@@ -618,8 +618,8 @@ const COORD_NARROW = { // dx, dy, anchor used at phone width
   "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[-12,12,"end"],
 };
 const narrow = ()=>matchMedia("(max-width:760px)").matches;
-// Close pairs (Johannesburg/Centurion ~30 km, Cape Town/Paarl ~50 km): pins pushed apart, with a leader line to the true spot
-const NUDGE = {"Johannesburg":[-12,16], "Centurion":[12,-16], "Cape Town":[-13,12], "Paarl":[14,-14]};
+// Close pairs (Johannesburg/Centurion ~30 km; Paarl ~50 km from Cape Town, which stays on its coast): pins pushed apart, with a leader line to the true spot
+const NUDGE = {"Johannesburg":[-12,16], "Centurion":[12,-16], "Paarl":[16,-30]};
 const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=NUDGE[c]||[0,0]; return [tx+nx, ty+ny, tx, ty]; };
 
 function renderMap(list){
