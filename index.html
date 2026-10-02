@@ -214,7 +214,12 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .mow-a{fill:var(--grass)} .mow-b{fill:var(--grass-alt)}
 .stands{fill:var(--stand)}
 .roof{fill:none;stroke:var(--line);stroke-width:4}
-.tiers{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:2 7}
+.seat{opacity:.8}
+.seat-0{fill:var(--accent)} .seat-1{fill:var(--pitch)} .seat-2{fill:var(--ochre)} .seat-3{fill:var(--ko)} .seat-4{fill:var(--line);opacity:1}
+.wave{fill:var(--rope);opacity:.6;pointer-events:none}
+.wavebtn{font:inherit;font-size:12px;font-weight:600;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 12px;cursor:pointer;margin-left:auto}
+.wavebtn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.wavebtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .boards{fill:none;stroke:var(--boards);stroke-width:9;stroke-dasharray:46 5;opacity:.85}
 .rope{fill:none;stroke:var(--rope);stroke-width:4}
 .circle30{fill:none;stroke:var(--rope);stroke-width:2.5;stroke-dasharray:9 8;opacity:.75;pointer-events:none}
@@ -622,6 +627,37 @@ const NUDGE = {"Johannesburg":[-12,16], "Centurion":[12,-16], "Paarl":[18,-38]};
 const WRAP = new Set(["Cape Town"]); // labels split over two lines to stay inside the boundary
 const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=NUDGE[c]||[0,0]; return [tx+nx, ty+ny, tx, ty]; };
 
+// ---- stand seating: 5 rows of seats facing the pitch, radial aisles, gaps behind the sightscreens ----
+let SEAT_CACHE = "";
+function seatsSVG(){
+  if(SEAT_CACHE) return SEAT_CACHE;
+  const paths = ["","","","",""]; // four block colours + empty seats
+  const rnd = (a,b)=>{ const x=Math.sin(a*127.1+b*311.7)*43758.5453; return x-Math.floor(x); }; // stable pseudo-random
+  const BLOCK = 7.5, AISLE = 0.9, W = 7, D = 5.5;
+  [462,473,484,495,506].forEach((rx,row)=>{
+    const ry = rx-40, per = 2*Math.PI*Math.sqrt((rx*rx+ry*ry)/2), n = Math.round(per/10.5);
+    for(let k=0;k<n;k++){
+      const deg = k/n*360, inBlock = deg % BLOCK;
+      if(inBlock < AISLE) continue;                                    // aisle
+      if(Math.abs(deg-90) < 8 || Math.abs(deg-270) < 8) continue;      // behind the sightscreens
+      const t = deg*Math.PI/180, cx = 400+rx*Math.cos(t), cy = 400+ry*Math.sin(t);
+      const ux = -Math.sin(t), uy = Math.cos(t), vx = Math.cos(t), vy = Math.sin(t); // along row, towards outside
+      const c = [[-W/2,-D/2],[W/2,-D/2],[W/2,D/2],[-W/2,D/2]].map(([a,b])=>(cx+a*ux+b*vx).toFixed(1)+","+(cy+a*uy+b*vy).toFixed(1));
+      const slot = rnd(row,k) < 0.8 ? Math.floor(deg/BLOCK)%4 : 4;
+      paths[slot] += "M"+c.join("L")+"Z";
+    }
+  });
+  SEAT_CACHE = paths.map((d,i)=>`<path class="seat seat-${i}" d="${d}"></path>`).join("");
+  return SEAT_CACHE;
+}
+let waveOn = true;
+try{ const w = localStorage.getItem("cwc27wave"); waveOn = w ? w==="on" : !matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
+function waveSVG(){
+  if(!waveOn) return "";
+  const r=760, a=16*Math.PI/180, p=(t)=>(400+r*Math.cos(t)).toFixed(1)+","+(400+r*Math.sin(t)).toFixed(1);
+  return `<g clip-path="url(#standRing)"><path class="wave" d="M400,400L${p(-a)}A${r},${r} 0 0,1 ${p(a)}Z"><animateTransform attributeName="transform" type="rotate" from="0 400 400" to="360 400 400" dur="14s" repeatCount="indefinite"></animateTransform></path></g>`;
+}
+
 function renderMap(list){
   const ids = new Set(list.map(m=>m.no));
   const counts = {}; list.forEach(m=>counts[m.city]=(counts[m.city]||0)+1);
@@ -659,10 +695,11 @@ function renderMap(list){
           <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="arrow"></path></marker>
           <pattern id="mow" width="84" height="10" patternUnits="userSpaceOnUse"><rect width="42" height="10" class="mow-a"></rect><rect x="42" width="42" height="10" class="mow-b"></rect></pattern>
           <clipPath id="field"><ellipse cx="400" cy="400" rx="438" ry="418"></ellipse></clipPath>
+          <clipPath id="standRing"><path clip-rule="evenodd" d="M-112,400a512,472 0 1,0 1024,0a512,472 0 1,0 -1024,0ZM-56,400a456,416 0 1,0 912,0a456,416 0 1,0 -912,0Z"></path></clipPath>
         </defs>
         <ellipse class="roof" cx="400" cy="400" rx="530" ry="490"></ellipse>
         <ellipse class="stands" cx="400" cy="400" rx="520" ry="480"></ellipse>
-        ${[466,480,494,508].map(r=>`<ellipse class="tiers" cx="400" cy="400" rx="${r}" ry="${r-40}"></ellipse>`).join("")}
+        ${seatsSVG()}${waveSVG()}
         <rect class="screen" x="356" y="-34" width="88" height="18" rx="2"></rect>
         <rect class="screen" x="356" y="816" width="88" height="18" rx="2"></rect>
         <ellipse class="boards" cx="400" cy="400" rx="450" ry="430"></ellipse>
@@ -683,6 +720,7 @@ function renderMap(list){
         <span><i class="lg-sel"></i>Selected venue</span>
         <span><i class="lg-none"></i>No matches in current selection</span>
         ${route?`<span><i class="lg-route"></i>${esc(real[0])} travel route</span>`:""}
+        <button class="wavebtn" id="waveBtn" aria-pressed="${waveOn}">Crowd wave: ${waveOn?"on":"off"}</button>
       </figcaption>
     </figure>
     <aside class="vdetail" id="vdetail">${detailHTML(list)}</aside>
@@ -814,6 +852,7 @@ function setFocusVenue(c){
 $("#out").addEventListener("mouseover",e=>{const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin)});
 $("#out").addEventListener("focusin",e=>{const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin)});
 $("#out").addEventListener("click",e=>{
+  if(e.target.closest("#waveBtn")){ waveOn=!waveOn; try{localStorage.setItem("cwc27wave",waveOn?"on":"off")}catch(err){} render(); const b=$("#waveBtn"); if(b) b.focus({preventScroll:true}); return; }
   const t=e.target.closest(".team[data-team], .vlink[data-venue], [data-pin], [data-vcard]"); if(t){activate(t);return}
   const c=e.target.closest("[data-goto]"); if(c){
     const no=+c.dataset.goto; state.view="list";
