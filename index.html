@@ -695,8 +695,8 @@ function benchesSVG(){
     // single-line label; pick the orientation (radial or along the bench) that allows the larger text
     const am=(d0+d1)/2, mid=ept((RI[0]+RO[0])/2,(RI[1]+RO[1])/2,am), arc=(d1-d0)*Math.PI/180*((RI[0]+RO[0])/2 - 20);
     const chars = first.length+2+second.length;
-    const fRad = Math.min(24, arc*0.85/1.2, depth*0.92/(0.6*chars));
-    const fTan = Math.min(30, depth*0.85/1.2, arc*0.92/(0.6*chars));
+    const fRad = Math.min(28, arc*0.88/1.2, depth*0.97/(0.5*chars)); // generous start; fitBenches() trims to the bench
+    const fTan = Math.min(32, depth*0.88/1.2, arc*0.97/(0.5*chars));
     const tan = fTan > fRad, F = Math.max(fRad,fTan), A = ((am%360)+360)%360;
     let rot = tan ? am+90 : am;
     if(tan ? (A>0 && A<180) : (A>90 && A<270)) rot += 180;
@@ -721,12 +721,12 @@ function fitBenches(){
   svg.querySelectorAll(".benchg").forEach(g=>{
     const t = g.querySelector("text"), p = g.querySelector(".bench");
     try{
-      for(let i=0;i<12;i++){
+      for(let i=0;i<20;i++){
         const b = t.getBBox(), m = inv.multiply(t.getCTM());
         const fits = [[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]]
           .every(([x,y])=>p.isPointInFill(new DOMPoint(x,y).matrixTransform(m)));
         if(fits) break;
-        const F = parseFloat(t.style.fontSize)*0.93;
+        const F = parseFloat(t.style.fontSize)*0.96;
         t.style.fontSize = F.toFixed(1)+"px";
         t.setAttribute("y",(0.35*F).toFixed(1));
       }
