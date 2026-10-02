@@ -342,9 +342,9 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
     <div class="active" id="active" aria-live="polite"></div>
     <input id="q" type="search" placeholder="Search teams, cities, stadiums" aria-label="Search">
     <div class="seg" role="group" aria-label="View">
-      <button data-view="list" aria-pressed="true">List</button>
+      <button data-view="venues" aria-pressed="true">Map</button>
+      <button data-view="list" aria-pressed="false">List</button>
       <button data-view="cal" aria-pressed="false">Calendar</button>
-      <button data-view="venues" aria-pressed="false">Map</button>
     </div>
     <div class="count"><span id="count"></span> <button class="reset" id="reset" hidden>Clear all selections</button></div>
   </div>
@@ -469,7 +469,7 @@ const esc = s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;
 const teamKey = s=>TBD.test(s.name)?TBD_KEY:s.name;
 
 // ---- state (all four selections are remembered in this browser) ----
-const state = {teams:new Set(), venues:new Set(), dates:new Set(), stages:new Set(), from:"", to:"", h2h:false, q:"", view:"list", tab:"teams"};
+const state = {teams:new Set(), venues:new Set(), dates:new Set(), stages:new Set(), from:"", to:"", h2h:false, q:"", view:"venues", tab:"teams"};
 try{
   const s = JSON.parse(localStorage.getItem("cwc27v2")||"{}");
   ["teams","venues","dates","stages"].forEach(k=>{ if(Array.isArray(s[k])) state[k]=new Set(s[k]) });
