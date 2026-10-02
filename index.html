@@ -214,8 +214,17 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .mow-a{fill:var(--grass)} .mow-b{fill:var(--grass-alt)}
 .stands{fill:var(--stand)}
 .roof{fill:none;stroke:var(--line);stroke-width:4}
-.seat{opacity:.8}
-.seat-0{fill:var(--accent)} .seat-1{fill:var(--pitch)} .seat-2{fill:var(--ochre)} .seat-3{fill:var(--ko)} .seat-4{fill:var(--line);opacity:1}
+.benchg{cursor:pointer;outline:none}
+.bench{fill:var(--sv-soft);stroke:var(--sv);stroke-width:1.4}
+.btxt{font-family:var(--font-body);font-weight:600;fill:var(--fg);pointer-events:none}
+.btxt .bt2{font-weight:700}
+.benchg:hover .bench,.benchg:focus-visible .bench,.benchg.on .bench{fill:var(--sv)}
+.benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
+.benchg.atv .bench{stroke-width:4}
+.mcard{display:grid;gap:4px;padding:10px 12px;border-radius:4px;background:var(--sv-soft);border-left:4px solid var(--sv)}
+.mcard b{font-size:16px}
+.mcard span{font-size:13px;color:var(--muted)}
+.mcard .opt{justify-self:start;margin-top:4px}
 .wave{fill:var(--rope);opacity:.6;pointer-events:none}
 .wavebtn{font:inherit;font-size:12px;font-weight:600;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 12px;cursor:pointer;margin-left:auto}
 .wavebtn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
@@ -627,28 +636,40 @@ const NUDGE = {"Johannesburg":[-12,16], "Centurion":[12,-16], "Paarl":[18,-38]};
 const WRAP = new Set(["Cape Town"]); // labels split over two lines to stay inside the boundary
 const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=NUDGE[c]||[0,0]; return [tx+nx, ty+ny, tx, ty]; };
 
-// ---- stand seating: 5 rows of seats facing the pitch, radial aisles, gaps behind the sightscreens ----
-let SEAT_CACHE = "";
-function seatsSVG(){
-  if(SEAT_CACHE) return SEAT_CACHE;
-  const paths = ["","","","",""]; // four block colours + empty seats
-  const rnd = (a,b)=>{ const x=Math.sin(a*127.1+b*311.7)*43758.5453; return x-Math.floor(x); }; // stable pseudo-random
-  const BLOCK = 7.5, AISLE = 0.9, W = 7, D = 5.5;
-  [462,473,484,495,506].forEach((rx,row)=>{
-    const ry = rx-40, per = 2*Math.PI*Math.sqrt((rx*rx+ry*ry)/2), n = Math.round(per/10.5);
-    for(let k=0;k<n;k++){
-      const deg = k/n*360, inBlock = deg % BLOCK;
-      if(inBlock < AISLE) continue;                                    // aisle
-      if(Math.abs(deg-90) < 8 || Math.abs(deg-270) < 8) continue;      // behind the sightscreens
-      const t = deg*Math.PI/180, cx = 400+rx*Math.cos(t), cy = 400+ry*Math.sin(t);
-      const ux = -Math.sin(t), uy = Math.cos(t), vx = Math.cos(t), vy = Math.sin(t); // along row, towards outside
-      const c = [[-W/2,-D/2],[W/2,-D/2],[W/2,D/2],[-W/2,D/2]].map(([a,b])=>(cx+a*ux+b*vx).toFixed(1)+","+(cy+a*uy+b*vy).toFixed(1));
-      const slot = rnd(row,k) < 0.8 ? Math.floor(deg/BLOCK)%4 : 4;
-      paths[slot] += "M"+c.join("L")+"Z";
-    }
-  });
-  SEAT_CACHE = paths.map((d,i)=>`<path class="seat seat-${i}" d="${d}"></path>`).join("");
-  return SEAT_CACHE;
+// ---- stand benches: one curved bench per match shown, in date order clockwise from the top ----
+let focusMatch = 0;
+const RI=[458,418], RO=[526,486]; // inner / outer radii of the bench ring (x, y)
+const ept = (rx,ry,deg)=>{ const t=deg*Math.PI/180; return [400+rx*Math.cos(t), 400+ry*Math.sin(t)]; };
+const f1 = n=>n.toFixed(1);
+function benchTeams(m){
+  if(m.cls==="sf") return m.no===55 ? "SF 1" : "SF 2";
+  if(m.cls==="f") return "FINAL";
+  return short(m.home)+" v "+short(m.away);
+}
+function benchesSVG(){
+  const list = filtered(); if(!list.length) return "";
+  // leave a gap behind each sightscreen (top 270deg, bottom 90deg): two 170deg arcs
+  const n1 = Math.ceil(list.length/2), n2 = list.length-n1;
+  const slot = i => i<n1 ? [275 + i*170/n1, 275 + (i+1)*170/n1] : [95 + (i-n1)*170/n2, 95 + (i-n1+1)*170/n2];
+  const depth = (RO[0]-RI[0]);
+  return list.map((m,i)=>{
+    let [d0,d1] = slot(i); const span=d1-d0, gap=Math.min(0.5, span*0.12); d0+=gap; d1-=gap;
+    const large = d1-d0>180?1:0, o0=ept(RO[0],RO[1],d0), o1=ept(RO[0],RO[1],d1), i1=ept(RI[0],RI[1],d1), i0=ept(RI[0],RI[1],d0);
+    const path = `M${f1(o0[0])},${f1(o0[1])}A${RO[0]},${RO[1]} 0 ${large},1 ${f1(o1[0])},${f1(o1[1])}L${f1(i1[0])},${f1(i1[1])}A${RI[0]},${RI[1]} 0 ${large},0 ${f1(i0[0])},${f1(i0[1])}Z`;
+    // label: pick the orientation (radial or along the bench) that allows the larger text
+    const am=(d0+d1)/2, mid=ept((RI[0]+RO[0])/2,(RI[1]+RO[1])/2,am), arc=(d1-d0)*Math.PI/180*((RI[0]+RO[0])/2 - 20);
+    const date=`${m.date.getUTCDate()} ${fmtMon(m.date)}`, teams=benchTeams(m), chars=Math.max(date.length,teams.length);
+    const fRad = Math.min(14, arc*0.88/2.3, depth*0.9/(0.58*chars));
+    const fTan = Math.min(24, depth*0.88/2.3, arc*0.9/(0.58*chars));
+    const tan = fTan > fRad, F = Math.max(fRad,fTan), A = ((am%360)+360)%360;
+    let rot = tan ? am+90 : am;
+    if(tan ? (A>0 && A<180) : (A>90 && A<270)) rot += 180;
+    const label = `Match ${m.no}, ${fmtDow(m.date)} ${date}, ${m.home.name} v ${m.away.name}, ${LABEL[m.cls]}, ${m.stadium}, ${m.city}`;
+    return `<g class="benchg s-${m.cls}${m.no===focusMatch?" on":""}${m.city===focusVenue&&!focusMatch?" atv":""}" data-match="${m.no}" data-city="${esc(m.city)}" tabindex="0" role="button" aria-label="${esc(label)}">
+      <path class="bench" d="${path}"><title>${esc(label)}</title></path>
+      <text class="btxt" transform="translate(${f1(mid[0])},${f1(mid[1])}) rotate(${f1(rot)})" text-anchor="middle" style="font-size:${f1(F)}px"><tspan x="0" y="${f1(-0.22*F)}">${date}</tspan><tspan x="0" y="${f1(0.86*F)}" class="bt2">${esc(teams)}</tspan></text>
+    </g>`;
+  }).join("");
 }
 let waveOn = true;
 try{ const w = localStorage.getItem("cwc27wave"); waveOn = w ? w==="on" : !matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
@@ -695,11 +716,11 @@ function renderMap(list){
           <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="arrow"></path></marker>
           <pattern id="mow" width="84" height="10" patternUnits="userSpaceOnUse"><rect width="42" height="10" class="mow-a"></rect><rect x="42" width="42" height="10" class="mow-b"></rect></pattern>
           <clipPath id="field"><ellipse cx="400" cy="400" rx="438" ry="418"></ellipse></clipPath>
-          <clipPath id="standRing"><path clip-rule="evenodd" d="M-112,400a512,472 0 1,0 1024,0a512,472 0 1,0 -1024,0ZM-56,400a456,416 0 1,0 912,0a456,416 0 1,0 -912,0Z"></path></clipPath>
+          <clipPath id="standRing"><path clip-rule="evenodd" d="M-126,400a526,486 0 1,0 1052,0a526,486 0 1,0 -1052,0ZM-58,400a458,418 0 1,0 916,0a458,418 0 1,0 -916,0Z"></path></clipPath>
         </defs>
         <ellipse class="roof" cx="400" cy="400" rx="530" ry="490"></ellipse>
         <ellipse class="stands" cx="400" cy="400" rx="520" ry="480"></ellipse>
-        ${seatsSVG()}${waveSVG()}
+        ${benchesSVG()}${waveSVG()}
         <rect class="screen" x="356" y="-34" width="88" height="18" rx="2"></rect>
         <rect class="screen" x="356" y="816" width="88" height="18" rx="2"></rect>
         <ellipse class="boards" cx="400" cy="400" rx="450" ry="430"></ellipse>
@@ -720,6 +741,7 @@ function renderMap(list){
         <span><i class="lg-sel"></i>Selected venue</span>
         <span><i class="lg-none"></i>No matches in current selection</span>
         ${route?`<span><i class="lg-route"></i>${esc(real[0])} travel route</span>`:""}
+        <span>Benches = matches shown, in date order</span>
         <button class="wavebtn" id="waveBtn" aria-pressed="${waveOn}">Crowd wave: ${waveOn?"on":"off"}</button>
       </figcaption>
     </figure>
@@ -728,14 +750,19 @@ function renderMap(list){
 }
 function detailHTML(list){
   const c = focusVenue;
+  const fm = focusMatch && matches.find(m=>m.no===focusMatch);
+  const card = fm ? `<div class="mcard s-${fm.cls}"><span>Match ${fm.no} · ${LABEL[fm.cls]}</span><b>${esc(fm.home.name)} v ${esc(fm.away.name)}</b>
+      <span>${fmtDow(fm.date)} ${fm.date.getUTCDate()} ${fmtMon(fm.date)} 2027 · ${fm.time}${fm.dn?" day/night":""} SAST</span>
+      <span>${esc(fm.stadium)}, ${esc(fm.city)}</span><button class="opt" data-goto="${fm.no}">Show in list</button></div>` : "";
   if(!c){
     const sel=[...state.venues];
     return `<h3>Venues</h3><p class="meta">Hover or tap a pin to see its matches. Click a pin to add or remove that venue from your selection.</p>
+      <p class="meta">Each bench in the stands is one match, in date order clockwise from the top. Tap a bench for its details.</p>
       <p class="meta">${sel.length?`Selected: <b>${sel.map(esc).join(", ")}</b>`:"No venues selected, so every ground is shown."}</p>
       <p class="meta">Pick a single team on the Teams tab to draw its travel route.</p>`;
   }
   const v=VENUES[c], ms=list.filter(m=>m.city===c), all=matches.filter(m=>m.city===c).length;
-  return `<span class="flag">${v.country}</span><h3>${esc(c)}</h3>
+  return `${card}<span class="flag">${v.country}</span><h3>${esc(c)}</h3>
     <p class="meta">${esc(v.stadium)}${v.alt?` · ${esc(v.alt)}`:""} · capacity <span class="mono">${v.cap.toLocaleString("en-GB")}</span><br>${ms.length} of ${all} matches shown</p>
     <button class="opt" data-pin="${esc(c)}" aria-pressed="${state.venues.has(c)}">${state.venues.has(c)?"Remove from selection":"Select this venue"}</button>
     <ol>${ms.map(m=>`<li class="s-${m.cls}"><span class="mono">${m.date.getUTCDate()} ${fmtMon(m.date)}</span><span>${esc(short(m.home))} v ${esc(short(m.away))} · ${m.time}${m.dn?" D/N":""}</span></li>`).join("")||"<li>No matches in the current selection.</li>"}</ol>`;
@@ -844,14 +871,18 @@ function activate(el){
   if(el.matches("[data-vcard]")){ toggle(state.venues, el.dataset.vcard); focusVenue=el.dataset.vcard; state.tab="venues"; render(); return true; }
   return false;
 }
-function setFocusVenue(c){
-  if(c===focusVenue) return; focusVenue=c;
+function setFocusVenue(c, matchNo){
+  matchNo = matchNo||0;
+  if(c===focusVenue && matchNo===focusMatch) return; focusVenue=c; focusMatch=matchNo;
   document.querySelectorAll("svg [data-pin]").forEach(g=>g.classList.toggle("focus", g.dataset.pin===c));
+  document.querySelectorAll("svg .benchg").forEach(g=>{ g.classList.toggle("on", +g.dataset.match===matchNo); g.classList.toggle("atv", !matchNo && g.dataset.city===c); });
   const d=$("#vdetail"); if(d) d.innerHTML=detailHTML(filtered(true));
 }
-$("#out").addEventListener("mouseover",e=>{const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin)});
-$("#out").addEventListener("focusin",e=>{const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin)});
+function benchOrPin(e){ const b=e.target.closest("svg .benchg"); if(b){ setFocusVenue(b.dataset.city, +b.dataset.match); return; } const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin); }
+$("#out").addEventListener("mouseover",benchOrPin);
+$("#out").addEventListener("focusin",benchOrPin);
 $("#out").addEventListener("click",e=>{
+  const bg=e.target.closest("svg .benchg"); if(bg){ setFocusVenue(bg.dataset.city, +bg.dataset.match); const d=$("#vdetail"); if(d && narrow()) d.scrollIntoView({block:"nearest",behavior:"smooth"}); return; }
   if(e.target.closest("#waveBtn")){ waveOn=!waveOn; try{localStorage.setItem("cwc27wave",waveOn?"on":"off")}catch(err){} render(); const b=$("#waveBtn"); if(b) b.focus({preventScroll:true}); return; }
   const t=e.target.closest(".team[data-team], .vlink[data-venue], [data-pin], [data-vcard]"); if(t){activate(t);return}
   const c=e.target.closest("[data-goto]"); if(c){
