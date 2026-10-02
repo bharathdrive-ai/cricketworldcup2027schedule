@@ -221,6 +221,10 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .benchg:hover .bench,.benchg:focus-visible .bench,.benchg.on .bench{fill:var(--sv)}
 .benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
 .benchg.atv .bench{stroke-width:4}
+.cat-team,.cat-venue{--sv:var(--accent);--sv-soft:var(--sunk)}
+.catg .bench{stroke-dasharray:6 3}
+.catg.sel .bench{fill:var(--sv);stroke-dasharray:none}
+.catg.sel .btxt{fill:var(--surface)}
 .mcard{display:grid;gap:4px;padding:10px 12px;border-radius:4px;background:var(--sv-soft);border-left:4px solid var(--sv)}
 .mcard b{font-size:16px}
 .mcard span{font-size:13px;color:var(--muted)}
@@ -646,30 +650,65 @@ function benchTeams(m){
   if(m.cls==="f") return "FINAL";
   return short(m.home)+" v "+short(m.away);
 }
+// filter benches after the matches: 4 stages, 12 venues, 14 teams (10 confirmed + 4 qualifier places)
+const STAGE_BENCH = [["Super Series",["ss"]],["Group Stage",["ga","gb"]],["Super 7",["s7"]],["Knockouts",["sf","f"]]];
+function filterBenchItems(){
+  const items = [{gap:true}];
+  STAGE_BENCH.forEach(([name,cls])=>items.push({kind:"stage", key:cls.join(","), label:name, n:matches.filter(m=>cls.includes(m.cls)).length,
+    on:cls.every(c=>state.stages.has(c)), cls:cls[0]==="sf"?"sf":cls[0]==="ga"?"ga":cls[0]}));
+  items.push({gap:true});
+  Object.keys(VENUES).sort().forEach(v=>items.push({kind:"venue", key:v, label:v, n:matches.filter(m=>m.city===v).length, on:state.venues.has(v), city:v}));
+  items.push({gap:true});
+  TEAMS.forEach(t=>items.push({kind:"team", key:t, label:t, n:matches.filter(m=>m.home.name===t||m.away.name===t).length, on:state.teams.has(t)}));
+  [1,2,3,4].forEach(q=>items.push({kind:"team", key:TBD_KEY, label:"Qualifier "+q, n:0, on:state.teams.has(TBD_KEY)}));
+  return items;
+}
 function benchesSVG(){
-  const list = filtered(); if(!list.length) return "";
-  // leave a gap behind each sightscreen (top 270deg, bottom 90deg): two 170deg arcs
-  const n1 = Math.ceil(list.length/2), n2 = list.length-n1;
+  const items = filtered().map(m=>({kind:"match", m})).concat(filterBenchItems());
+  // two 168deg arcs either side of the sightscreens (top 270deg, bottom 90deg)
+  const T = items.length, n1 = Math.ceil(T/2), n2 = T-n1;
   const slot = i => i<n1 ? [276 + i*168/n1, 276 + (i+1)*168/n1] : [96 + (i-n1)*168/n2, 96 + (i-n1+1)*168/n2];
   const depth = (RO[0]-RI[0]);
-  return list.map((m,i)=>{
+  return items.map((it,i)=>{
+    if(it.gap) return "";
     let [d0,d1] = slot(i); const span=d1-d0, gap=Math.min(0.5, span*0.12); d0+=gap; d1-=gap;
     const large = d1-d0>180?1:0, o0=ept(RO[0],RO[1],d0), o1=ept(RO[0],RO[1],d1), i1=ept(RI[0],RI[1],d1), i0=ept(RI[0],RI[1],d0);
     const path = `M${f1(o0[0])},${f1(o0[1])}A${RO[0]},${RO[1]} 0 ${large},1 ${f1(o1[0])},${f1(o1[1])}L${f1(i1[0])},${f1(i1[1])}A${RI[0]},${RI[1]} 0 ${large},0 ${f1(i0[0])},${f1(i0[1])}Z`;
-    // label: pick the orientation (radial or along the bench) that allows the larger text
+    let first, second, cls, attrs, label;
+    if(it.kind==="match"){
+      const m = it.m;
+      first = `${m.date.getUTCDate()} ${fmtMon(m.date)}`; second = benchTeams(m);
+      cls = `benchg s-${m.cls}${m.no===focusMatch?" on":""}${m.city===focusVenue&&!focusMatch?" atv":""}`;
+      label = `Match ${m.no}, ${fmtDow(m.date)} ${first}, ${m.home.name} v ${m.away.name}, ${LABEL[m.cls]}, ${m.stadium}, ${m.city}`;
+      attrs = `data-match="${m.no}" data-city="${esc(m.city)}"`;
+    } else {
+      first = it.label; second = it.n ? String(it.n) : "TBD";
+      cls = `benchg catg cat-${it.kind}${it.kind==="stage"?" s-"+it.cls:""}${it.on?" sel":""}${it.city&&it.city===focusVenue&&!focusMatch?" atv":""}`;
+      const what = it.kind==="team" && it.key===TBD_KEY ? `${it.label}, decided at the World Cup Qualifier in March 2027` : `${it.label}, ${it.n} matches`;
+      label = `${it.on?"Remove":"Add"} ${it.kind} filter: ${what}`;
+      attrs = `data-kind="${it.kind}" data-key="${esc(it.key)}"${it.city?` data-city="${esc(it.city)}"`:""} aria-pressed="${it.on}"`;
+    }
+    // single-line label; pick the orientation (radial or along the bench) that allows the larger text
     const am=(d0+d1)/2, mid=ept((RI[0]+RO[0])/2,(RI[1]+RO[1])/2,am), arc=(d1-d0)*Math.PI/180*((RI[0]+RO[0])/2 - 20);
-    const date=`${m.date.getUTCDate()} ${fmtMon(m.date)}`, teams=benchTeams(m), chars=date.length+2+teams.length;
+    const chars = first.length+2+second.length;
     const fRad = Math.min(24, arc*0.85/1.2, depth*0.92/(0.6*chars));
     const fTan = Math.min(30, depth*0.85/1.2, arc*0.92/(0.6*chars));
     const tan = fTan > fRad, F = Math.max(fRad,fTan), A = ((am%360)+360)%360;
     let rot = tan ? am+90 : am;
     if(tan ? (A>0 && A<180) : (A>90 && A<270)) rot += 180;
-    const label = `Match ${m.no}, ${fmtDow(m.date)} ${date}, ${m.home.name} v ${m.away.name}, ${LABEL[m.cls]}, ${m.stadium}, ${m.city}`;
-    return `<g class="benchg s-${m.cls}${m.no===focusMatch?" on":""}${m.city===focusVenue&&!focusMatch?" atv":""}" data-match="${m.no}" data-city="${esc(m.city)}" tabindex="0" role="button" aria-label="${esc(label)}">
+    return `<g class="${cls}" ${attrs} tabindex="0" role="button" aria-label="${esc(label)}">
       <path class="bench" d="${path}"><title>${esc(label)}</title></path>
-      <text class="btxt" transform="translate(${f1(mid[0])},${f1(mid[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${date}</tspan><tspan class="bt2" dx="0.55em">${esc(teams)}</tspan></text>
+      <text class="btxt" transform="translate(${f1(mid[0])},${f1(mid[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.55em">${esc(second)}</tspan></text>
     </g>`;
   }).join("");
+}
+function toggleBenchFilter(g){
+  const k=g.dataset.kind, key=g.dataset.key;
+  if(k==="team") toggle(state.teams,key);
+  else if(k==="venue") toggle(state.venues,key);
+  else if(k==="stage"){ const cls=key.split(","), on=cls.every(c=>state.stages.has(c)); cls.forEach(c=>on?state.stages.delete(c):state.stages.add(c)); }
+  focusMatch=0; render();
+  const again=document.querySelector(`svg .catg[data-kind="${k}"][data-key="${CSS.escape(key)}"]`); if(again) again.focus({preventScroll:true});
 }
 // shrink any bench label that spills past its own bench outline (measured, so it holds for every font)
 function fitBenches(){
@@ -762,7 +801,7 @@ function renderMap(list){
         <span><i class="lg-sel"></i>Selected venue</span>
         <span><i class="lg-none"></i>No matches in current selection</span>
         ${route?`<span><i class="lg-route"></i>${esc(real[0])} travel route</span>`:""}
-        <span>Benches = matches shown, in date order</span>
+        <span>Benches: matches in date order, then stages, venues and teams (tap to filter)</span>
         <button class="wavebtn" id="waveBtn" aria-pressed="${waveOn}">Crowd wave: ${waveOn?"on":"off"}</button>
       </figcaption>
     </figure>
@@ -778,7 +817,7 @@ function detailHTML(list){
   if(!c){
     const sel=[...state.venues];
     return `<h3>Venues</h3><p class="meta">Hover or tap a pin to see its matches. Click a pin to add or remove that venue from your selection.</p>
-      <p class="meta">Each bench in the stands is one match, in date order clockwise from the top. Tap a bench for its details.</p>
+      <p class="meta">Each solid bench in the stands is one match, in date order clockwise from the top. Tap it for details. The dashed benches after them are stages, venues and teams: tap one to filter.</p>
       <p class="meta">${sel.length?`Selected: <b>${sel.map(esc).join(", ")}</b>`:"No venues selected, so every ground is shown."}</p>
       <p class="meta">Pick a single team on the Teams tab to draw its travel route.</p>`;
   }
@@ -900,10 +939,11 @@ function setFocusVenue(c, matchNo){
   document.querySelectorAll("svg .benchg").forEach(g=>{ g.classList.toggle("on", +g.dataset.match===matchNo); g.classList.toggle("atv", !matchNo && g.dataset.city===c); });
   const d=$("#vdetail"); if(d) d.innerHTML=detailHTML(filtered(true));
 }
-function benchOrPin(e){ const b=e.target.closest("svg .benchg"); if(b){ setFocusVenue(b.dataset.city, +b.dataset.match); return; } const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin); }
+function benchOrPin(e){ const b=e.target.closest("svg .benchg"); if(b){ if(b.classList.contains("catg")){ if(b.dataset.city) setFocusVenue(b.dataset.city); return; } setFocusVenue(b.dataset.city, +b.dataset.match); return; } const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin); }
 $("#out").addEventListener("mouseover",benchOrPin);
 $("#out").addEventListener("focusin",benchOrPin);
 $("#out").addEventListener("click",e=>{
+  const cg=e.target.closest("svg .catg"); if(cg){ toggleBenchFilter(cg); return; }
   const bg=e.target.closest("svg .benchg"); if(bg){ setFocusVenue(bg.dataset.city, +bg.dataset.match); const d=$("#vdetail"); if(d && narrow()) d.scrollIntoView({block:"nearest",behavior:"smooth"}); return; }
   if(e.target.closest("#waveBtn")){ waveOn=!waveOn; try{localStorage.setItem("cwc27wave",waveOn?"on":"off")}catch(err){} render(); const b=$("#waveBtn"); if(b) b.focus({preventScroll:true}); return; }
   const t=e.target.closest(".team[data-team], .vlink[data-venue], [data-pin], [data-vcard]"); if(t){activate(t);return}
@@ -914,7 +954,8 @@ $("#out").addEventListener("click",e=>{
     const el=document.getElementById("m"+no); if(el){el.classList.add("hl"); el.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); setTimeout(()=>el.classList.remove("hl"),2200);}
   }
 });
-$("#out").addEventListener("keydown",e=>{const t=e.target.closest(".team[data-team], .vlink[data-venue], svg [data-pin]"); if(t&&(e.key==="Enter"||e.key===" ")){e.preventDefault();activate(t)}});
+$("#out").addEventListener("keydown",e=>{
+  const kb=e.target.closest("svg .benchg"); if(kb&&(e.key==="Enter"||e.key===" ")){ e.preventDefault(); if(kb.classList.contains("catg")) toggleBenchFilter(kb); else setFocusVenue(kb.dataset.city,+kb.dataset.match); return; }const t=e.target.closest(".team[data-team], .vlink[data-venue], svg [data-pin]"); if(t&&(e.key==="Enter"||e.key===" ")){e.preventDefault();activate(t)}});
 
 // countdown to first ball (Match 1, 10:00 SAST = 08:00 UTC)
 function tick(){
