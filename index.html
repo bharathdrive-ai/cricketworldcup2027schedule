@@ -266,8 +266,8 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 @media (max-width:760px){
   .controls input,.controls select,.range input{font-size:16px}
   .theme button{padding:8px 11px;font-size:13px}
-  .pin text{font-size:36px;stroke-width:6px}
-  .pin text .n{font-size:28px}
+  .pin text{font-size:34px;stroke-width:6px}
+  .pin text .n{font-size:27px}
   .clab.host{font-size:44px}
   .clab:not(.host),.ocean{display:none}
   .opt{padding:8px 14px}
@@ -612,8 +612,8 @@ const COORD = { // lat, lon, label anchor (dx, dy, text-anchor)
 const CLABEL = {"South Africa":[-30.6,22.3],"Namibia":[-20.4,17.6],"Zimbabwe":[-19.3,30.4],"Botswana":[-22.4,24.0],"Mozambique":[-22.6,33.4],"Zambia":[-15.6,27.4],"Angola":[-15.8,15.6],"Lesotho":[-29.5,28.3],"eSwatini":[-26.5,31.9]};
 let focusVenue = "";
 const COORD_NARROW = { // dx, dy, anchor used at phone width
-  "Harare":[-12,4,"end"], "Durban":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
-  "KuGompo City":[0,-16,"middle"], "Gqeberha":[0,44,"middle"], "Johannesburg":[-12,16,"end"],
+  "Harare":[-12,4,"end"], "Durban":[0,38,"middle"], "Bulawayo":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
+  "KuGompo City":[0,-16,"middle"], "Gqeberha":[0,36,"middle"], "Johannesburg":[-12,16,"end"],
   "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[12,4,"start"],
 };
 const narrow = ()=>matchMedia("(max-width:760px)").matches;
