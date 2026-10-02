@@ -234,6 +234,14 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .benchg:hover .bench,.benchg:focus-visible .bench,.benchg.on .bench{fill:var(--sv)}
 .benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
 .benchg.atv .bench{stroke-width:4}
+/* bench label polish */
+.btxt{paint-order:stroke;stroke:var(--sv-soft);stroke-width:3px;stroke-linejoin:round}
+.benchg:not(.catg) .bt1{fill:color-mix(in srgb,var(--sv) 70%,var(--fg))}
+.catg .bt2{fill:var(--muted)}
+.benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt,.catg.sel .btxt{stroke:var(--sv)}
+.benchg:hover .btxt tspan,.benchg:focus-visible .btxt tspan,.benchg.on .btxt tspan,.catg.sel .btxt tspan{fill:var(--surface)}
+.benchg:focus-visible .bench{stroke:var(--fg);stroke-width:3}
+@media (prefers-reduced-motion:no-preference){.bench,.btxt,.btxt tspan{transition:fill .18s ease,stroke .18s ease}}
 .cat-team,.cat-venue{--sv:var(--accent);--sv-soft:var(--sunk)}
 .catg.sel .bench{fill:var(--sv)}
 .catg.sel .btxt{fill:var(--surface)}
