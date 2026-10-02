@@ -626,7 +626,7 @@ const MAPS = 1.05, MAPCX = 474, MAPCY = 414;
 const proj0 = (lat,lon)=>[(lon-11)*MAPK*MAPC, (-15-lat)*MAPK];
 const proj = (lat,lon)=>{ const [x,y]=proj0(lat,lon); return [400+MAPS*(x-MAPCX), 400+MAPS*(y-MAPCY)]; };
 const COORD = { // lat, lon, label anchor (dx, dy, text-anchor)
-  "Cape Town":[-33.974,18.469,12,0,"start"], "Paarl":[-33.736,18.962,11,-6,"start"],
+  "Cape Town":[-33.974,18.469,12,0,"start"], "Paarl":[-33.736,18.962,0,-16,"middle"],
   "Johannesburg":[-26.132,28.057,-12,10,"end"], "Centurion":[-25.860,28.180,11,-6,"start"],
   "Bloemfontein":[-29.117,26.207,11,-3,"start"], "Durban":[-29.851,31.029,11,4,"start"],
   "KuGompo City":[-33.017,27.904,-12,5,"end"], "Gqeberha":[-33.962,25.612,0,22,"middle"],
@@ -702,14 +702,18 @@ function benchesSVG(){
     // single-line label; pick the orientation (radial or along the bench) that allows the larger text
     const am=(d0+d1)/2, mid=ept((RI[0]+RO[0])/2,(RI[1]+RO[1])/2,am), arc=(d1-d0)*Math.PI/180*((RI[0]+RO[0])/2 - 20);
     const chars = (it.kind==="match" ? first.length*1.15 : first.length)+2+second.length;
-    const fRad = Math.min(28, arc*0.92/1.15, depth*0.97/(0.5*chars)); // generous start; fitBenches() trims to the bench
+    const arcOut = (d1-d0)*Math.PI/180*(RO[0]-15); // radial labels sit at the wide outer end of the wedge
+    const fRad = Math.min(28, arcOut*0.92/1.45, depth*0.97/(0.5*chars)); // generous start; fitBenches() trims to the bench
     const fTan = Math.min(32, depth*0.88/1.2, arc*0.97/(0.5*chars));
     const tan = fTan > fRad, F = Math.max(fRad,fTan), A = ((am%360)+360)%360;
     let rot = tan ? am+90 : am;
-    if(tan ? (A>0 && A<180) : (A>90 && A<270)) rot += 180;
+    const flip = tan ? (A>0 && A<180) : (A>90 && A<270);
+    if(flip) rot += 180;
+    // radial: anchor the text just inside the outer edge (bench is widest there); along-bench: centre it
+    const pos = tan ? mid : ept(RO[0]-12, RO[1]-12, am), anc = tan ? "middle" : (flip ? "start" : "end");
     return `<g class="${cls}" ${attrs} tabindex="0" role="button" aria-label="${esc(label)}">
       <path class="bench" d="${path}"><title>${esc(label)}</title></path>
-      <text class="btxt" transform="translate(${f1(mid[0])},${f1(mid[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.45em">${esc(second)}</tspan></text>
+      <text class="btxt" transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="${anc}" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.45em">${esc(second)}</tspan></text>
     </g>`;
   }).join("");
 }
