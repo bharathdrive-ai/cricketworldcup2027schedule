@@ -684,7 +684,7 @@ function benchesSVG(){
   const depth = (RO[0]-RI[0]);
   return items.map((it,i)=>{
     if(it.gap) return "";
-    let [d0,d1] = it._d; const span=d1-d0, gap=Math.min(0.5, span*0.12); d0+=gap; d1-=gap;
+    let [d0,d1] = it._d; const span=d1-d0, gap=Math.min(0.25, span*0.06); d0+=gap; d1-=gap;
     const large = d1-d0>180?1:0, o0=ept(RO[0],RO[1],d0), o1=ept(RO[0],RO[1],d1), i1=ept(RI[0],RI[1],d1), i0=ept(RI[0],RI[1],d0);
     const path = `M${f1(o0[0])},${f1(o0[1])}A${RO[0]},${RO[1]} 0 ${large},1 ${f1(o1[0])},${f1(o1[1])}L${f1(i1[0])},${f1(i1[1])}A${RI[0]},${RI[1]} 0 ${large},0 ${f1(i0[0])},${f1(i0[1])}Z`;
     let first, second, cls, attrs, label;
@@ -712,7 +712,7 @@ function benchesSVG(){
     const flip = tan ? (A>0 && A<180) : (A>90 && A<270);
     if(flip) rot += 180;
     // radial: anchor the text just inside the outer edge (bench is widest there); along-bench: centre it
-    const pos = tan ? mid : ept(RO[0]-12, RO[1]-12, am), anc = tan ? "middle" : (flip ? "start" : "end");
+    const pos = tan ? mid : ept(RO[0]-8, RO[1]-8, am), anc = tan ? "middle" : (flip ? "start" : "end");
     return `<g class="${cls}" ${attrs} tabindex="0" role="button" aria-label="${esc(label)}">
       <path class="bench" d="${path}"><title>${esc(label)}</title></path>
       <text class="btxt" transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="${anc}" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.45em">${esc(second)}</tspan></text>
@@ -735,7 +735,8 @@ function fitBenches(){
     const t = g.querySelector("text"), p = g.querySelector(".bench");
     try{
       for(let i=0;i<20;i++){
-        const b = t.getBBox(), m = inv.multiply(t.getCTM());
+        // check the inked band only: the line box reserves space above capitals and below the baseline that these labels never use
+        const b0 = t.getBBox(), m = inv.multiply(t.getCTM()), b = {x:b0.x, width:b0.width, y:b0.y+b0.height*0.1, height:b0.height*0.78};
         const fits = [[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]]
           .every(([x,y])=>p.isPointInFill(new DOMPoint(x,y).matrixTransform(m)));
         if(fits) break;
