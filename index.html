@@ -647,7 +647,7 @@ const narrow = ()=>matchMedia("(max-width:760px)").matches;
 const NUDGE = {"Johannesburg":[-12,16], "Centurion":[12,-16], "Paarl":[18,-38]};
 const WRAP = new Set(["Cape Town"]);
 const BOLD = new Set(["Johannesburg"]); // Final venue: bold label // labels split over two lines to stay inside the boundary
-const NUDGE_NARROW = {"Paarl":[18,-52]}; // phones: lift Paarl further so the larger two-line Cape Town label fits below it
+const NUDGE_NARROW = {"Paarl":[18,-62]}; // phones: lift Paarl further so the larger two-line Cape Town label fits below it
 const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=(narrow()&&NUDGE_NARROW[c])||NUDGE[c]||[0,0]; return [tx+nx, ty+ny, tx, ty]; };
 
 // ---- stand benches: one curved bench per match shown, in date order clockwise from the top ----
