@@ -305,7 +305,7 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .note a{color:var(--accent)}
 @media (prefers-reduced-motion:no-preference){.match,.chip{transition:box-shadow .15s,opacity .15s}}
 </style>
-<script>try{var t=localStorage.getItem("cwc27theme");if(t==="light"||t==="dark"||t==="green")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script>var t="dark";try{t=localStorage.getItem("cwc27theme")||"dark"}catch(e){}if(t==="light"||t==="dark"||t==="green")document.documentElement.setAttribute("data-theme",t)</script>
 </head>
 <body>
 <div class="wrap">
@@ -1001,9 +1001,9 @@ function applyTheme(t){
   if(t==="light"||t==="dark"||t==="green") document.documentElement.setAttribute("data-theme",t);
   else document.documentElement.removeAttribute("data-theme");
   document.querySelectorAll("[data-theme-opt]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.themeOpt===(t||"system")));
-  try{ t&&t!=="system"?localStorage.setItem("cwc27theme",t):localStorage.removeItem("cwc27theme") }catch(e){}
+  try{ localStorage.setItem("cwc27theme", t||"system") }catch(e){}
 }
-let savedTheme=""; try{ savedTheme=localStorage.getItem("cwc27theme")||"" }catch(e){}
+let savedTheme="dark"; try{ savedTheme=localStorage.getItem("cwc27theme")||"dark" }catch(e){} // Dark is the default theme
 applyTheme(savedTheme);
 $("#themeSwitch").onclick=e=>{const b=e.target.closest("[data-theme-opt]"); if(b) applyTheme(b.dataset.themeOpt)};
 render();
