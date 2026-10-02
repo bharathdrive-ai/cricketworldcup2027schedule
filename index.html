@@ -220,7 +220,7 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .btxt{font-family:var(--font-body);font-weight:700;fill:var(--fg);pointer-events:none}
 .btxt .bt2{font-weight:700}
 .benchg:not(.catg) .bt1{font-size:1.15em}
-.cat-team .btxt{font-family:var(--font-display);font-weight:800;letter-spacing:.04em}
+.cat-team .btxt,.cat-venue .btxt{font-family:var(--font-display);font-weight:800;letter-spacing:.04em}
 .cat-stage .btxt{font-family:var(--font-display);font-weight:800;letter-spacing:.04em;fill:var(--sv);fill:color-mix(in srgb,var(--sv) 75%,var(--fg))}
 .benchg:hover .bench,.benchg:focus-visible .bench,.benchg.on .bench{fill:var(--sv)}
 .benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
@@ -695,7 +695,7 @@ function benchesSVG(){
       label = `Match ${m.no}, ${fmtDow(m.date)} ${first}, ${m.home.name} v ${m.away.name}, ${LABEL[m.cls]}, ${m.stadium}, ${m.city}`;
       attrs = `data-match="${m.no}" data-city="${esc(m.city)}"`;
     } else {
-      first = (it.kind==="stage"||it.kind==="team") ? it.label.toUpperCase() : it.label; second = it.n ? String(it.n) : "TBD";
+      first = it.label.toUpperCase(); second = it.n ? String(it.n) : "TBD";
       cls = `benchg catg cat-${it.kind}${it.kind==="stage"?" s-"+it.cls:""}${it.on?" sel":""}${it.city&&it.city===focusVenue&&!focusMatch?" atv":""}`;
       const what = it.kind==="team" && it.key===TBD_KEY ? `${it.label}, decided at the World Cup Qualifier in March 2027` : `${it.label}, ${it.n} matches`;
       label = `${it.on?"Remove":"Add"} ${it.kind} filter: ${what}`;
