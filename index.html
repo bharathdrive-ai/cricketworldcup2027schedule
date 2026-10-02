@@ -670,7 +670,8 @@ function filterBenchItems(){
   Object.keys(VENUES).sort().forEach(v=>items.push({kind:"venue", key:v, label:v, n:matches.filter(m=>m.city===v).length, on:state.venues.has(v), city:v}));
   items.push({gap:true});
   TEAMS.forEach(t=>items.push({kind:"team", key:t, label:t, n:matches.filter(m=>m.home.name===t||m.away.name===t).length, on:state.teams.has(t)}));
-  [1,2,3,4].forEach(q=>items.push({kind:"team", key:TBD_KEY, label:"Qualifier "+q, n:0, on:state.teams.has(TBD_KEY)}));
+  ["A","B","C","D"].forEach(q=>items.push({kind:"team", key:TBD_KEY, label:"Qualifier "+q, // letters, matching the fixtures (Qualifier A / B)
+    n:0, on:state.teams.has(TBD_KEY)}));
   return items;
 }
 function benchesSVG(){
