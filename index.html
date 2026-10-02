@@ -626,7 +626,7 @@ const COORD = { // lat, lon, label anchor (dx, dy, text-anchor)
 const CLABEL = {"South Africa":[-30.6,22.3],"Namibia":[-20.4,17.6],"Zimbabwe":[-19.3,30.4],"Botswana":[-22.4,24.0],"Mozambique":[-22.6,33.4],"Zambia":[-15.6,27.4],"Angola":[-15.8,15.6],"Lesotho":[-29.5,28.3],"eSwatini":[-26.5,31.9]};
 let focusVenue = "";
 const COORD_NARROW = { // dx, dy, anchor used at phone width
-  "Harare":[-12,4,"end"], "Durban":[0,38,"middle"], "Bulawayo":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
+  "Harare":[-12,16,"end"], "Durban":[0,38,"middle"], "Bulawayo":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
   "KuGompo City":[0,-16,"middle"], "Gqeberha":[0,36,"middle"], "Johannesburg":[-12,16,"end"],
   "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[12,4,"start"],
 };
@@ -671,6 +671,28 @@ function benchesSVG(){
     </g>`;
   }).join("");
 }
+// shrink any bench label that spills past its own bench outline (measured, so it holds for every font)
+function fitBenches(){
+  const svg = document.querySelector(".map svg"); if(!svg) return;
+  let inv; try{ inv = svg.getCTM().inverse(); }catch(e){ return; }
+  svg.querySelectorAll(".benchg").forEach(g=>{
+    const t = g.querySelector("text"), p = g.querySelector(".bench");
+    try{
+      for(let i=0;i<12;i++){
+        const b = t.getBBox(), m = inv.multiply(t.getCTM());
+        const fits = [[b.x,b.y],[b.x+b.width,b.y],[b.x,b.y+b.height],[b.x+b.width,b.y+b.height]]
+          .every(([x,y])=>p.isPointInFill(new DOMPoint(x,y).matrixTransform(m)));
+        if(fits) break;
+        const F = parseFloat(t.style.fontSize)*0.93;
+        t.style.fontSize = F.toFixed(1)+"px";
+        t.children[0].setAttribute("y",(-0.22*F).toFixed(1));
+        t.children[1].setAttribute("y",(0.86*F).toFixed(1));
+      }
+    }catch(e){}
+  });
+}
+// web fonts can arrive after the first draw and change text widths: fit again once they're ready
+try{ document.fonts && document.fonts.ready.then(()=>{ if(state.view==="venues") fitBenches(); }); }catch(e){}
 let waveOn = true;
 try{ const w = localStorage.getItem("cwc27wave"); waveOn = w ? w==="on" : !matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
 function waveSVG(){
@@ -809,6 +831,7 @@ function renderActive(){
 function render(){
   const list = filtered();
   $("#out").innerHTML = state.view==="list"?renderList(list):state.view==="cal"?renderCal(list):renderVenues(list);
+  if(state.view==="venues") fitBenches();
   $("#count").textContent = `${list.length} of ${matches.length} matches`;
   $("#reset").hidden = !anySelection();
   // picker state
