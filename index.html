@@ -240,7 +240,20 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .vdetail li .mono{color:var(--muted);font-size:12px}
 .venue{cursor:pointer}
 .venue.sel{border-color:var(--ko);box-shadow:0 0 0 1px var(--ko)}
-@media (max-width:760px){.mapwrap{grid-template-columns:1fr}.vdetail{position:static}.pin text{font-size:17px}}
+@media (max-width:760px){.mapwrap{grid-template-columns:1fr}.vdetail{position:static}}
+
+/* mobile fixes */
+.cal-wrap>*,.cal{min-width:0}
+@media (max-width:760px){
+  .controls input,.controls select,.range input{font-size:16px}
+  .theme button{padding:8px 14px;font-size:13px}
+  .pin text{font-size:28px;stroke-width:6px}
+  .pin text .n{font-size:22px}
+  .clab.host{font-size:34px}
+  .clab:not(.host),.ocean{display:none}
+  .opt{padding:8px 14px}
+  .tabs button{font-size:18px;padding:12px 14px}
+}
 
 /* team panel */
 .teampanel{margin-top:16px;padding:14px 16px;background:var(--accent-soft);border-radius:6px;display:flex;flex-wrap:wrap;gap:6px 20px;align-items:baseline}
@@ -578,6 +591,12 @@ const COORD = { // lat, lon, label anchor (dx, dy, text-anchor)
 };
 const CLABEL = {"South Africa":[-30.6,22.3],"Namibia":[-20.4,17.6],"Zimbabwe":[-19.3,30.4],"Botswana":[-22.4,24.0],"Mozambique":[-22.6,33.4],"Zambia":[-15.6,27.4],"Angola":[-15.8,15.6],"Lesotho":[-29.5,28.3],"eSwatini":[-26.5,31.9]};
 let focusVenue = "";
+const COORD_NARROW = { // dx, dy, anchor used at phone width
+  "Harare":[-12,4,"end"], "Durban":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
+  "KuGompo City":[0,32,"middle"], "Gqeberha":[0,34,"middle"], "Johannesburg":[-12,16,"end"],
+  "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[-12,12,"end"],
+};
+const narrow = ()=>matchMedia("(max-width:760px)").matches;
 
 function renderMap(list){
   const ids = new Set(list.map(m=>m.no));
@@ -597,7 +616,7 @@ function renderMap(list){
   }
   const order = Object.keys(COORD).sort((a,b)=>(state.venues.has(a)-state.venues.has(b))||(a===focusVenue)-(b===focusVenue));
   const pins = order.map(c=>{
-    const [la,lo,dx,dy,anc] = COORD[c], [x,y] = proj(la,lo), n = counts[c]||0;
+    const [la,lo] = COORD[c], [dx,dy,anc] = (narrow() && COORD_NARROW[c]) || COORD[c].slice(2), [x,y] = proj(la,lo), n = counts[c]||0;
     const r = n ? 4 + 1.5*Math.sqrt(n) : 4;
     const cls = ["pin", n?"":"none", state.venues.has(c)?"sel":"", c===focusVenue?"focus":""].join(" ");
     return `<g class="${cls}" data-pin="${esc(c)}" tabindex="0" role="button" aria-pressed="${state.venues.has(c)}" aria-label="${esc(c)}, ${n} matches shown">
@@ -776,6 +795,7 @@ function tick(){
   $("#countdown").innerHTML=html; $("#cdLabel").textContent=label;
 }
 tick(); setInterval(tick,30000);
+try{ matchMedia("(max-width:760px)").addEventListener("change",()=>{ if(state.view==="venues") render() }) }catch(e){}
 
 // theme switch: System follows prefers-color-scheme; Light/Dark pin data-theme on <html>
 function applyTheme(t){
