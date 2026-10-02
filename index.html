@@ -248,8 +248,8 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .pin{cursor:pointer;outline:none}
 .pin .dot{fill:var(--pin);stroke:var(--surface);stroke-width:2.5}
 .pin .halo{fill:var(--pin);opacity:0}
-.pin text{font-size:25px;font-weight:600;fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
-.pin text .n{font-family:var(--font-mono);font-size:22px;fill:var(--pin);font-weight:600}
+.pin text{font-size:26px;font-weight:600;fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.pin text .n{font-family:var(--font-mono);font-size:23px;fill:var(--pin);font-weight:600}
 .pin.none .dot{fill:var(--surface);stroke:var(--muted);stroke-width:1.5}
 .pin.none text{fill:var(--muted);font-weight:500}
 .pin.sel .dot{fill:var(--pin-sel)}
@@ -285,8 +285,8 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 @media (max-width:760px){
   .controls input,.controls select,.range input{font-size:16px}
   .theme button{padding:8px 11px;font-size:13px}
-  .pin text{font-size:40px;stroke-width:6px}
-  .pin text .n{font-size:35px}
+  .pin text{font-size:41px;stroke-width:6px}
+  .pin text .n{font-size:36px}
   .clab.host{font-size:46px}
   .clab:not(.host)
   .opt{padding:8px 14px}
@@ -647,7 +647,7 @@ const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=(narrow(
 
 // ---- stand benches: one curved bench per match shown, in date order clockwise from the top ----
 let focusMatch = 0;
-const RI=[458,418], RO=[638,598]; // inner / outer radii of the bench ring (x, y)
+const RI=[458,418], RO=[660,620]; // inner / outer radii of the bench ring (x, y)
 const ept = (rx,ry,deg)=>{ const t=deg*Math.PI/180; return [400+rx*Math.cos(t), 400+ry*Math.sin(t)]; };
 const f1 = n=>n.toFixed(1);
 function benchTeams(m){
@@ -703,7 +703,7 @@ function benchesSVG(){
     if(tan ? (A>0 && A<180) : (A>90 && A<270)) rot += 180;
     return `<g class="${cls}" ${attrs} tabindex="0" role="button" aria-label="${esc(label)}">
       <path class="bench" d="${path}"><title>${esc(label)}</title></path>
-      <text class="btxt" transform="translate(${f1(mid[0])},${f1(mid[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.55em">${esc(second)}</tspan></text>
+      <text class="btxt" transform="translate(${f1(mid[0])},${f1(mid[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.45em">${esc(second)}</tspan></text>
     </g>`;
   }).join("");
 }
@@ -778,15 +778,15 @@ function renderMap(list){
   }).join("");
   return `<div class="mapwrap">
     <figure class="map">
-      <svg viewBox="-256 -216 1312 1232" role="img" aria-label="Map of South Africa, Zimbabwe and Namibia drawn inside a cricket ground, with the 12 World Cup venues">
+      <svg viewBox="-278 -238 1356 1276" role="img" aria-label="Map of South Africa, Zimbabwe and Namibia drawn inside a cricket ground, with the 12 World Cup venues">
         <defs>
           <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="arrow"></path></marker>
           <pattern id="mow" width="84" height="10" patternUnits="userSpaceOnUse"><rect width="42" height="10" class="mow-a"></rect><rect x="42" width="42" height="10" class="mow-b"></rect></pattern>
           <clipPath id="field"><ellipse cx="400" cy="400" rx="438" ry="418"></ellipse></clipPath>
-          <clipPath id="standRing"><path clip-rule="evenodd" d="M-238,400a638,598 0 1,0 1276,0a638,598 0 1,0 -1276,0ZM-58,400a458,418 0 1,0 916,0a458,418 0 1,0 -916,0Z"></path></clipPath>
+          <clipPath id="standRing"><path clip-rule="evenodd" d="M-260,400a660,620 0 1,0 1320,0a660,620 0 1,0 -1320,0ZM-58,400a458,418 0 1,0 916,0a458,418 0 1,0 -916,0Z"></path></clipPath>
         </defs>
-        <ellipse class="roof" cx="400" cy="400" rx="648" ry="608"></ellipse>
-        <ellipse class="stands" cx="400" cy="400" rx="640" ry="600"></ellipse>
+        <ellipse class="roof" cx="400" cy="400" rx="670" ry="630"></ellipse>
+        <ellipse class="stands" cx="400" cy="400" rx="662" ry="622"></ellipse>
         ${benchesSVG()}${waveSVG()}
         <rect class="screen" x="356" y="-34" width="88" height="18" rx="2"></rect>
         <rect class="screen" x="356" y="816" width="88" height="18" rx="2"></rect>
