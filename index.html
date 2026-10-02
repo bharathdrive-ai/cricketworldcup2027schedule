@@ -677,8 +677,10 @@ function benchesSVG(){
   const wOf = it => it.gap ? 1 : it.kind==="stage" ? 1.3 : (it.kind==="venue"||it.kind==="team") ? 1.2 : 1;
   const W = items.reduce((t,it)=>t+wOf(it),0), arc1=[], arc2=[];
   let acc = 0; items.forEach(it=>{ (acc < W/2 ? arc1 : arc2).push(it); acc += wOf(it); });
-  const place = (arr,start)=>{ const tot=arr.reduce((t,it)=>t+wOf(it),0); let c=0; arr.forEach(it=>{ const w=wOf(it); it._d=[start+c*168/tot, start+(c+w)*168/tot]; c+=w; }); };
-  place(arc1,276); place(arc2,96);
+  // gaps of 7.2deg behind each sightscreen (top 270, bottom 90)
+  const SPAN = 172.8;
+  const place = (arr,start)=>{ const tot=arr.reduce((t,it)=>t+wOf(it),0); let c=0; arr.forEach(it=>{ const w=wOf(it); it._d=[start+c*SPAN/tot, start+(c+w)*SPAN/tot]; c+=w; }); };
+  place(arc1,273.6); place(arc2,93.6);
   const depth = (RO[0]-RI[0]);
   return items.map((it,i)=>{
     if(it.gap) return "";
@@ -798,8 +800,8 @@ function renderMap(list){
         <ellipse class="roof" cx="400" cy="400" rx="670" ry="630"></ellipse>
         <ellipse class="stands" cx="400" cy="400" rx="662" ry="622"></ellipse>
         ${benchesSVG()}${waveSVG()}
-        <rect class="screen" x="356" y="-34" width="88" height="18" rx="2"></rect>
-        <rect class="screen" x="356" y="816" width="88" height="18" rx="2"></rect>
+        <rect class="screen" x="374" y="-34" width="52" height="18" rx="2"></rect>
+        <rect class="screen" x="374" y="816" width="52" height="18" rx="2"></rect>
         <ellipse class="boards" cx="400" cy="400" rx="450" ry="430"></ellipse>
         <g clip-path="url(#field)">
           <rect x="-40" y="-20" width="880" height="840" class="sea"></rect>
