@@ -761,13 +761,16 @@ function renderMap(list){
   const order = Object.keys(COORD).sort((a,b)=>(state.venues.has(a)-state.venues.has(b))||(a===focusVenue)-(b===focusVenue));
   const pins = order.map(c=>{
     const [dx,dy,anc] = (narrow() && COORD_NARROW[c]) || COORD[c].slice(2), [x,y] = pinXY(c), n = counts[c]||0;
-    const r = n ? 4 + 1.5*Math.sqrt(n) : 4;
+    const r = n ? 5.5 + 1.9*Math.sqrt(n) : 5.5;
+    // labels move out by however much the dot grew, so the bigger pin never covers its name
+    const pad = r - (n ? 4 + 1.5*Math.sqrt(n) : 4);
+    const lx = x + dx + (dx ? Math.sign(dx)*pad : 0), ly = y + dy + (dx ? 0 : Math.sign(dy)*pad);
     const cls = ["pin", n?"":"none", state.venues.has(c)?"sel":"", c===focusVenue?"focus":""].join(" ");
     return `<g class="${cls}" data-pin="${esc(c)}" tabindex="0" role="button" aria-pressed="${state.venues.has(c)}" aria-label="${esc(c)}, ${n} matches shown">
       <circle class="halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r+5).toFixed(1)}"></circle>
       <circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"></circle>
-      <text x="${(x+dx).toFixed(1)}" y="${(y+dy).toFixed(1)}" text-anchor="${anc}">${WRAP.has(c)
-        ? c.split(" ").map((w,i,a)=>`<tspan x="${(x+dx).toFixed(1)}"${i?' dy="1em"':""}>${esc(w)}${i===a.length-1&&n?` <tspan class="n">${n}</tspan>`:""}</tspan>`).join("")
+      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anc}">${WRAP.has(c)
+        ? c.split(" ").map((w,i,a)=>`<tspan x="${lx.toFixed(1)}"${i?' dy="1em"':""}>${esc(w)}${i===a.length-1&&n?` <tspan class="n">${n}</tspan>`:""}</tspan>`).join("")
         : `${esc(c)}${n?` <tspan class="n">${n}</tspan>`:""}`}</text>
     </g>`;
   }).join("");
