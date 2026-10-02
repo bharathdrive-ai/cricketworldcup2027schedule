@@ -219,6 +219,7 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .bench{fill:var(--sv-soft);stroke:var(--sv);stroke-width:1.4}
 .btxt{font-family:var(--font-body);font-weight:700;fill:var(--fg);pointer-events:none}
 .btxt .bt2{font-weight:700}
+.benchg:not(.catg) .bt1{font-size:1.15em}
 .benchg:hover .bench,.benchg:focus-visible .bench,.benchg.on .bench{fill:var(--sv)}
 .benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
 .benchg.atv .bench{stroke-width:4}
@@ -694,7 +695,7 @@ function benchesSVG(){
     }
     // single-line label; pick the orientation (radial or along the bench) that allows the larger text
     const am=(d0+d1)/2, mid=ept((RI[0]+RO[0])/2,(RI[1]+RO[1])/2,am), arc=(d1-d0)*Math.PI/180*((RI[0]+RO[0])/2 - 20);
-    const chars = first.length+2+second.length;
+    const chars = (it.kind==="match" ? first.length*1.15 : first.length)+2+second.length;
     const fRad = Math.min(28, arc*0.88/1.2, depth*0.97/(0.5*chars)); // generous start; fitBenches() trims to the bench
     const fTan = Math.min(32, depth*0.88/1.2, arc*0.97/(0.5*chars));
     const tan = fTan > fRad, F = Math.max(fRad,fTan), A = ((am%360)+360)%360;
