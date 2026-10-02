@@ -625,7 +625,7 @@ const proj = (lat,lon)=>{ const [x,y]=proj0(lat,lon); return [400+MAPS*(x-MAPCX)
 const COORD = { // lat, lon, label anchor (dx, dy, text-anchor)
   "Cape Town":[-33.974,18.469,12,0,"start"], "Paarl":[-33.736,18.962,11,-6,"start"],
   "Johannesburg":[-26.132,28.057,-12,10,"end"], "Centurion":[-25.860,28.180,11,-6,"start"],
-  "Bloemfontein":[-29.117,26.207,11,4,"start"], "Durban":[-29.851,31.029,11,4,"start"],
+  "Bloemfontein":[-29.117,26.207,11,-3,"start"], "Durban":[-29.851,31.029,11,4,"start"],
   "KuGompo City":[-33.017,27.904,-12,5,"end"], "Gqeberha":[-33.962,25.612,0,22,"middle"],
   "Harare":[-17.814,31.051,-12,5,"end"], "Bulawayo":[-20.157,28.592,11,4,"start"],
   "Victoria Falls":[-17.930,25.830,-11,4,"end"], "Windhoek":[-22.560,17.080,11,4,"start"],
@@ -635,13 +635,14 @@ let focusVenue = "";
 const COORD_NARROW = { // dx, dy, anchor used at phone width
   "Harare":[-12,16,"end"], "Durban":[0,38,"middle"], "Bulawayo":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
   "KuGompo City":[0,-16,"middle"], "Gqeberha":[0,36,"middle"], "Johannesburg":[-12,16,"end"],
-  "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[12,-6,"start"],
+  "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[12,-14,"start"], "Victoria Falls":[-12,16,"end"],
 };
 const narrow = ()=>matchMedia("(max-width:760px)").matches;
 // Close pairs (Johannesburg/Centurion ~30 km; Paarl ~50 km from Cape Town, which stays on its coast): pins drawn slightly apart so they don't overlap
 const NUDGE = {"Johannesburg":[-12,16], "Centurion":[12,-16], "Paarl":[18,-38]};
 const WRAP = new Set(["Cape Town"]); // labels split over two lines to stay inside the boundary
-const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=NUDGE[c]||[0,0]; return [tx+nx, ty+ny, tx, ty]; };
+const NUDGE_NARROW = {"Paarl":[18,-52]}; // phones: lift Paarl further so the larger two-line Cape Town label fits below it
+const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=(narrow()&&NUDGE_NARROW[c])||NUDGE[c]||[0,0]; return [tx+nx, ty+ny, tx, ty]; };
 
 // ---- stand benches: one curved bench per match shown, in date order clockwise from the top ----
 let focusMatch = 0;
