@@ -635,7 +635,7 @@ let focusVenue = "";
 const COORD_NARROW = { // dx, dy, anchor used at phone width
   "Harare":[-12,16,"end"], "Durban":[0,38,"middle"], "Bulawayo":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
   "KuGompo City":[0,-16,"middle"], "Gqeberha":[0,36,"middle"], "Johannesburg":[-12,16,"end"],
-  "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[12,4,"start"],
+  "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[12,-6,"start"],
 };
 const narrow = ()=>matchMedia("(max-width:760px)").matches;
 // Close pairs (Johannesburg/Centurion ~30 km; Paarl ~50 km from Cape Town, which stays on its coast): pins drawn slightly apart so they don't overlap
