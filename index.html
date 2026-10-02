@@ -293,7 +293,7 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
   .pin text .n{font-size:36px}
   .clab.host{font-size:46px}
   .clab:not(.host){display:none}
-  .ocean{font-size:27px}
+  .ocean{font-size:24px}
   .opt{padding:8px 14px}
   .tabs button{font-size:18px;padding:12px 14px}
 }
@@ -765,8 +765,9 @@ function renderMap(list){
   const ids = new Set(list.map(m=>m.no));
   const counts = {}; list.forEach(m=>counts[m.city]=(counts[m.city]||0)+1);
   const lands = GEO.map(g=>`<path d="${g.d}" class="${g.kind==="host"?"land host":"land"}"><title>${g.name}</title></path>`).join("");
-  const OCEANS = [["Atlantic","Ocean",-32.0,16.5,"Cold Benguela Current flows north along this coast"],["Indian","Ocean",-32.0,32.2,"Warm Agulhas Current flows south along this coast"]];
-  const oceans = OCEANS.map(([a,b,la,lo,note])=>{ const [x,y]=proj(la,lo); return `<text class="ocean" x="${x.toFixed(0)}" y="${(y-8).toFixed(0)}" text-anchor="middle"><title>${a} ${b}: ${note}</title><tspan x="${x.toFixed(0)}">${a}</tspan><tspan x="${x.toFixed(0)}" dy="1.15em">${b}</tspan></text>`; }).join("");
+  // [line 1, line 2, lat, lon, phone lat, phone lon, note]
+  const OCEANS = [["Atlantic","Ocean",-32.0,16.5,-31.0,15.9,"Cold Benguela Current flows north along this coast"],["Indian","Ocean",-32.0,32.2,-33.2,31.0,"Warm Agulhas Current flows south along this coast"]];
+  const oceans = OCEANS.map(([a,b,la,lo,pla,plo,note])=>{ const [x,y]=narrow()?proj(pla,plo):proj(la,lo); return `<text class="ocean" x="${x.toFixed(0)}" y="${(y-8).toFixed(0)}" text-anchor="middle"><title>${a} ${b}: ${note}</title><tspan x="${x.toFixed(0)}">${a}</tspan><tspan x="${x.toFixed(0)}" dy="1.15em">${b}</tspan></text>`; }).join("");
   const clabels = Object.entries(CLABEL).map(([n,[la,lo]])=>{ const [x,y]=proj(la,lo); const host=["South Africa","Namibia","Zimbabwe"].includes(n);
     return `<text x="${x.toFixed(0)}" y="${y.toFixed(0)}" class="${host?"clab host":"clab"}" text-anchor="middle">${n==="eSwatini"?"ESW.":n==="Lesotho"?"LES.":n.toUpperCase()}</text>`}).join("");
   // single-team travel route, in date order
