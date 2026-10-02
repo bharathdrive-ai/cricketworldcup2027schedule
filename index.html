@@ -238,13 +238,13 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .land{fill:var(--land);stroke:var(--border);stroke-width:.8;stroke-linejoin:round}
 .land.host{fill:var(--land-host);stroke-width:1.2}
 .clab{font-size:11px;letter-spacing:.14em;fill:var(--muted);opacity:.6;font-weight:600;pointer-events:none}
-.clab.host{font-family:var(--font-display);font-size:28px;font-weight:800;letter-spacing:.08em;opacity:.45;fill:var(--fg)}
+.clab.host{font-family:var(--font-display);font-size:30px;font-weight:800;letter-spacing:.08em;opacity:.45;fill:var(--fg)}
 .ocean{font-size:16px;font-style:italic;fill:var(--fg);opacity:.55;letter-spacing:.1em;pointer-events:none}
 .pin{cursor:pointer;outline:none}
 .pin .dot{fill:var(--accent);stroke:var(--surface);stroke-width:2}
 .pin .halo{fill:var(--accent);opacity:0}
-.pin text{font-size:19px;font-weight:600;fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
-.pin text .n{font-family:var(--font-mono);font-size:14px;fill:var(--accent);font-weight:500}
+.pin text{font-size:20px;font-weight:600;fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.pin text .n{font-family:var(--font-mono);font-size:15px;fill:var(--accent);font-weight:500}
 .pin.none .dot{fill:var(--surface);stroke:var(--muted);stroke-width:1.5}
 .pin.none text{fill:var(--muted);font-weight:500}
 .pin.sel .dot{fill:var(--ko)}
@@ -280,9 +280,9 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 @media (max-width:760px){
   .controls input,.controls select,.range input{font-size:16px}
   .theme button{padding:8px 11px;font-size:13px}
-  .pin text{font-size:34px;stroke-width:6px}
-  .pin text .n{font-size:27px}
-  .clab.host{font-size:44px}
+  .pin text{font-size:36px;stroke-width:6px}
+  .pin text .n{font-size:28px}
+  .clab.host{font-size:46px}
   .clab:not(.host),.ocean{display:none}
   .opt{padding:8px 14px}
   .tabs button{font-size:18px;padding:12px 14px}
@@ -638,7 +638,7 @@ const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=NUDGE[c]
 
 // ---- stand benches: one curved bench per match shown, in date order clockwise from the top ----
 let focusMatch = 0;
-const RI=[458,418], RO=[526,486]; // inner / outer radii of the bench ring (x, y)
+const RI=[458,418], RO=[558,518]; // inner / outer radii of the bench ring (x, y)
 const ept = (rx,ry,deg)=>{ const t=deg*Math.PI/180; return [400+rx*Math.cos(t), 400+ry*Math.sin(t)]; };
 const f1 = n=>n.toFixed(1);
 function benchTeams(m){
@@ -650,7 +650,7 @@ function benchesSVG(){
   const list = filtered(); if(!list.length) return "";
   // leave a gap behind each sightscreen (top 270deg, bottom 90deg): two 170deg arcs
   const n1 = Math.ceil(list.length/2), n2 = list.length-n1;
-  const slot = i => i<n1 ? [275 + i*170/n1, 275 + (i+1)*170/n1] : [95 + (i-n1)*170/n2, 95 + (i-n1+1)*170/n2];
+  const slot = i => i<n1 ? [276 + i*168/n1, 276 + (i+1)*168/n1] : [96 + (i-n1)*168/n2, 96 + (i-n1+1)*168/n2];
   const depth = (RO[0]-RI[0]);
   return list.map((m,i)=>{
     let [d0,d1] = slot(i); const span=d1-d0, gap=Math.min(0.5, span*0.12); d0+=gap; d1-=gap;
@@ -659,8 +659,8 @@ function benchesSVG(){
     // label: pick the orientation (radial or along the bench) that allows the larger text
     const am=(d0+d1)/2, mid=ept((RI[0]+RO[0])/2,(RI[1]+RO[1])/2,am), arc=(d1-d0)*Math.PI/180*((RI[0]+RO[0])/2 - 20);
     const date=`${m.date.getUTCDate()} ${fmtMon(m.date)}`, teams=benchTeams(m), chars=Math.max(date.length,teams.length);
-    const fRad = Math.min(14, arc*0.88/2.3, depth*0.9/(0.58*chars));
-    const fTan = Math.min(24, depth*0.88/2.3, arc*0.9/(0.58*chars));
+    const fRad = Math.min(19, arc*0.88/2.3, depth*0.9/(0.58*chars));
+    const fTan = Math.min(30, depth*0.88/2.3, arc*0.9/(0.58*chars));
     const tan = fTan > fRad, F = Math.max(fRad,fTan), A = ((am%360)+360)%360;
     let rot = tan ? am+90 : am;
     if(tan ? (A>0 && A<180) : (A>90 && A<270)) rot += 180;
@@ -711,15 +711,15 @@ function renderMap(list){
   const [ax,ay]=proj(-30.6,13.6), [ix,iy]=proj(-31.6,33.4);
   return `<div class="mapwrap">
     <figure class="map">
-      <svg viewBox="-132 -92 1064 984" role="img" aria-label="Map of South Africa, Zimbabwe and Namibia drawn inside a cricket ground, with the 12 World Cup venues">
+      <svg viewBox="-176 -136 1152 1072" role="img" aria-label="Map of South Africa, Zimbabwe and Namibia drawn inside a cricket ground, with the 12 World Cup venues">
         <defs>
           <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="arrow"></path></marker>
           <pattern id="mow" width="84" height="10" patternUnits="userSpaceOnUse"><rect width="42" height="10" class="mow-a"></rect><rect x="42" width="42" height="10" class="mow-b"></rect></pattern>
           <clipPath id="field"><ellipse cx="400" cy="400" rx="438" ry="418"></ellipse></clipPath>
-          <clipPath id="standRing"><path clip-rule="evenodd" d="M-126,400a526,486 0 1,0 1052,0a526,486 0 1,0 -1052,0ZM-58,400a458,418 0 1,0 916,0a458,418 0 1,0 -916,0Z"></path></clipPath>
+          <clipPath id="standRing"><path clip-rule="evenodd" d="M-158,400a558,518 0 1,0 1116,0a558,518 0 1,0 -1116,0ZM-58,400a458,418 0 1,0 916,0a458,418 0 1,0 -916,0Z"></path></clipPath>
         </defs>
-        <ellipse class="roof" cx="400" cy="400" rx="530" ry="490"></ellipse>
-        <ellipse class="stands" cx="400" cy="400" rx="520" ry="480"></ellipse>
+        <ellipse class="roof" cx="400" cy="400" rx="568" ry="528"></ellipse>
+        <ellipse class="stands" cx="400" cy="400" rx="560" ry="520"></ellipse>
         ${benchesSVG()}${waveSVG()}
         <rect class="screen" x="356" y="-34" width="88" height="18" rx="2"></rect>
         <rect class="screen" x="356" y="816" width="88" height="18" rx="2"></rect>
