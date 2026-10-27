@@ -811,7 +811,7 @@ function benchesSVG(){
       label = `Match ${m.no}, ${fmtDow(m.date)} ${first}, ${m.home.name} v ${m.away.name}, ${LABEL[m.cls]}, ${m.stadium}, ${m.city}`;
       attrs = `data-match="${m.no}" data-city="${esc(m.city)}"`;
     } else {
-      first = it.label.toUpperCase(); second = it.n ? String(it.n) : "TBD";
+      first = it.label.toUpperCase(); second = it.kind==="team" ? "" : String(it.n); // team benches: name only
       cls = `benchg catg cat-${it.kind}${it.kind==="stage"?" s-"+it.cls:""}${it.on?" sel":""}${it.rel?" rel":""}${it.city&&it.city===focusVenue&&!focusMatch?" atv":""}`;
       const what = it.kind==="team" && it.key===TBD_KEY ? `${it.label}, decided at the World Cup Qualifier in March 2027` : `${it.label}, ${it.n} matches`;
       label = `${it.on?"Remove":"Add"} ${it.kind} filter: ${what}`;
@@ -831,7 +831,7 @@ function benchesSVG(){
     const pos = mid, anc = "middle"; // centred along the bench
     return `<g class="${cls}" ${attrs} tabindex="0" role="button" aria-label="${esc(label)}">
       <path class="bench" d="${path}"><title>${esc(label)}</title></path>
-      <text class="btxt" transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="${anc}" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan><tspan class="bt2" dx="0.45em">${esc(second)}</tspan></text>
+      <text class="btxt" transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="${anc}" y="${f1(0.35*F)}" style="font-size:${f1(F)}px"><tspan class="bt1">${esc(first)}</tspan>${second?`<tspan class="bt2" dx="0.45em">${esc(second)}</tspan>`:""}</text>
     </g>`;
   }).join("");
 }
