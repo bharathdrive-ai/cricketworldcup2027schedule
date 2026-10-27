@@ -69,7 +69,7 @@ h1 span{color:var(--accent)}
 .cd{background:var(--fg);color:var(--bg);padding:8px 10px;min-width:62px;text-align:center;border-radius:4px}
 .cd b{display:block;font-family:var(--font-display);font-size:34px;font-weight:800;line-height:1}
 .cd small{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
-.cd-label{font-size:12px;color:var(--muted);margin-top:6px;text-align:right}
+.cd-label{font-size:12px;color:var(--muted);margin-top:6px;white-space:nowrap;text-align:justify;text-align-last:justify}
 @media (max-width:640px){header.top{grid-template-columns:1fr}.cd-label{text-align:left}}
 
 .theme{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:2px;background:var(--surface);margin-bottom:12px;align-self:flex-end}
@@ -82,6 +82,7 @@ h1 span{color:var(--accent)}
 
 /* stats */
 .facts{display:flex;flex-wrap:wrap;gap:8px 28px;padding-block:14px;color:var(--muted);font-size:13px}
+.facts .askbtn{margin-left:auto;align-self:center}
 .facts b{color:var(--fg);font-family:var(--font-display);font-size:22px;margin-right:4px}
 
 /* format strip */
@@ -1144,12 +1145,20 @@ function tick(){
   if(now<start){
     let s=Math.floor((start-now)/1000); const d=Math.floor(s/86400); s%=86400; const h=Math.floor(s/3600); const m=Math.floor(s%3600/60);
     html=[[d,"days"],[h,"hrs"],[m,"min"]].map(([v,l])=>`<div class="cd"><b class="mono">${String(v).padStart(l==="days"?1:2,"0")}</b><small>${l}</small></div>`).join("");
-    label="to the first ball in Windhoek";
+    label="to the first ball in CWC 2027 Edition";
   } else if(now<end){ html=`<div class="cd"><b>LIVE</b><small>in progress</small></div>`; label="Tournament under way"; }
   else { html=`<div class="cd"><b>DONE</b><small>completed</small></div>`; label="Final played 21 Nov 2027"; }
-  $("#countdown").innerHTML=html; $("#cdLabel").textContent=label;
+  $("#countdown").innerHTML=html; $("#cdLabel").textContent=label; fitCdLabel();
+}
+// size the label under the countdown so it runs exactly as wide as the days/hours/minutes boxes
+function fitCdLabel(){
+  const cd=$("#countdown"), l=$("#cdLabel"), w=cd.getBoundingClientRect().width; if(!w) return;
+  l.style.fontSize=""; l.style.width="max-content";
+  const base=parseFloat(getComputedStyle(l).fontSize), tw=l.getBoundingClientRect().width;
+  l.style.fontSize=Math.max(9,Math.min(15,base*w/tw*.97))+"px"; l.style.width=w+"px"; // justify fills the last few pixels
 }
 tick(); setInterval(tick,30000);
+addEventListener("resize",fitCdLabel); if(document.fonts) document.fonts.ready.then(fitCdLabel);
 try{ matchMedia("(max-width:760px)").addEventListener("change",()=>{ if(state.view==="venues") render() }) }catch(e){}
 
 // theme switch: System follows prefers-color-scheme; Light/Dark pin data-theme on <html>
@@ -1191,8 +1200,8 @@ render();
             : host === "bharathdrive-ai.github.io" ? "https://cricketworldcup2027schedule.vercel.app/api/ask" : "";
   if(!API) return;
   const fab = $("#askFab"), panel = $("#askPanel"), log = $("#askLog"), form = $("#askForm"), input = $("#askInput"), send = $("#askSend"), sugg = $("#askSugg");
-  // in the page flow: the button sits in the filter bar, the panel under it (or docked right on wide screens)
-  const bar = $(".controls"); bar.querySelector(".seg").after(fab); bar.after(panel);
+  // in the page flow: the button ends the facts row, the panel sits under the filter bar (or docked right on wide screens)
+  const bar = $(".controls"); $(".facts").append(fab); bar.after(panel);
   const SUGGEST = ["When and where is the final?", "When does India play Pakistan?", "Which matches are in Durban?", "What is the Super 7 stage?"];
   const history = []; let busy = false;
   // show the button only once the server has its Gemini key
