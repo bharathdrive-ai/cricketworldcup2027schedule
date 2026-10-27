@@ -242,6 +242,9 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .benchg:hover .bench,.benchg:focus-visible .bench,.benchg.on .bench{fill:var(--sv)}
 .benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
 .benchg.atv .bench{stroke-width:4}
+/* related: filter benches tied to the matches currently shown */
+.catg.rel .bench{fill:var(--sv-soft);fill:color-mix(in srgb,var(--sv) 30%,var(--sv-soft));stroke-width:2.5}
+.catg.rel .btxt,.catg.rel .bt2{fill:var(--fg)}
 /* cross-highlight: the benches of the venue, team, date or stage being pointed at fill in; the rest fade */
 .map svg.hl-on .benchg:not(.hl){opacity:.32}
 .benchg.hl .bench{fill:var(--sv);fill-opacity:1;stroke-width:2.5}
@@ -695,6 +698,18 @@ function benchTeams(m){
 }
 // filter benches after the matches: 4 stages, 12 venues, 14 teams (10 confirmed + 4 qualifier places)
 const STAGE_BENCH = [["Super Series",["ss"]],["Group Stage",["ga","gb"]],["Super 7",["s7"]],["Knockouts",["sf","f"]]];
+// the teams, venues and stages a set of matches involves (placeholder sides count as "To be decided")
+function relatedSets(ms){
+  const r = {team:new Set(), venue:new Set(), stage:new Set()};
+  ms.forEach(m=>{ r.team.add(teamKey(m.home)); r.team.add(teamKey(m.away)); r.venue.add(m.city); r.stage.add(m.cls); });
+  return r;
+}
+function relatedHit(kind, key, r){
+  if(kind==="team") return r.team.has(key);
+  if(kind==="venue") return r.venue.has(key);
+  if(kind==="stage") return key.split(",").some(c=>r.stage.has(c));
+  return false;
+}
 function filterBenchItems(){
   const items = [{gap:true, header:"STAGES"}];
   STAGE_BENCH.forEach(([name,cls])=>items.push({kind:"stage", key:cls.join(","), label:name, n:matches.filter(m=>cls.includes(m.cls)).length,
@@ -705,6 +720,8 @@ function filterBenchItems(){
   TEAMS.forEach(t=>items.push({kind:"team", key:t, label:t, n:matches.filter(m=>m.home.name===t||m.away.name===t).length, on:state.teams.has(t)}));
   ["A","B","C","D"].forEach(q=>items.push({kind:"team", key:TBD_KEY, label:"Qualifier "+q, // letters, matching the fixtures (Qualifier A / B)
     n:0, on:state.teams.has(TBD_KEY)}));
+  const relSel = anySelection() ? relatedSets(filtered()) : null;
+  if(relSel) items.forEach(it=>{ if(!it.gap && !it.on) it.rel = relatedHit(it.kind, it.key, relSel); });
   return items;
 }
 function benchesSVG(){
@@ -751,7 +768,7 @@ function benchesSVG(){
       attrs = `data-match="${m.no}" data-city="${esc(m.city)}"`;
     } else {
       first = it.label.toUpperCase(); second = it.n ? String(it.n) : "TBD";
-      cls = `benchg catg cat-${it.kind}${it.kind==="stage"?" s-"+it.cls:""}${it.on?" sel":""}${it.city&&it.city===focusVenue&&!focusMatch?" atv":""}`;
+      cls = `benchg catg cat-${it.kind}${it.kind==="stage"?" s-"+it.cls:""}${it.on?" sel":""}${it.rel?" rel":""}${it.city&&it.city===focusVenue&&!focusMatch?" atv":""}`;
       const what = it.kind==="team" && it.key===TBD_KEY ? `${it.label}, decided at the World Cup Qualifier in March 2027` : `${it.label}, ${it.n} matches`;
       label = `${it.on?"Remove":"Add"} ${it.kind} filter: ${what}`;
       attrs = `data-kind="${it.kind}" data-key="${esc(it.key)}"${it.city?` data-city="${esc(it.city)}"`:""} aria-pressed="${it.on}"`;
@@ -1033,10 +1050,11 @@ function benchHL(kind, key){
   if(id===hlNow) return; hlNow = id;
   const svg = document.querySelector(".map svg"); if(!svg) return;
   svg.classList.toggle("hl-on", !!kind);
+  const relSet = kind ? relatedSets(matches.filter(m=>benchMatchHit(m, kind, key))) : null;
   svg.querySelectorAll(".benchg").forEach(g=>{
     let on = false;
     if(kind){
-      if(g.classList.contains("catg")) on = g.dataset.kind===kind && (kind==="stage" ? g.dataset.key.split(",").some(c=>key.split(",").includes(c)) : g.dataset.key===key);
+      if(g.classList.contains("catg")) on = relatedHit(g.dataset.kind, g.dataset.key, relSet);
       else { const m = matches.find(x=>x.no===+g.dataset.match); on = !!m && benchMatchHit(m, kind, key); }
     }
     g.classList.toggle("hl", on);
