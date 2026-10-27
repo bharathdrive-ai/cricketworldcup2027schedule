@@ -22,7 +22,7 @@
   --pitch:#246b45; --pitch-soft:#d7efe2;
   --ochre:#93590c; --ochre-soft:#f8e9cf;
   --ko:#ad2734; --ko-soft:#fadde1;
-  --sea:#bcdbf3; --land:#f4f6f8; --land-host:#efe8d8; --border:#9db3c8; --route:#ad2734;
+  --sea:#2f7fc8; --sea-alt:#2a78c1; --land:#f4f6f8; --land-host:#efe8d8; --border:#9db3c8; --route:#ad2734;
   --grass:#9fd08c; --grass-alt:#92c67e; --stand:#cfe2f2; --boards:#1c6bb5; --rope:#ffffff; --strip:#dcc896;
   --pin:#8b1a2b; --pin-sel:#d7263d;
   --font-display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
@@ -42,13 +42,13 @@
   --bg:#e4f3e5; --g1:#cfeccf; --g2:#eaf6e4; --g3:#fdf3cf; --surface:#ffffff; --sunk:#d2ead5; --fg:#12301f; --muted:#476652; --line:#bfddc4;
   --accent:#1f6e35; --accent-soft:#d0ebd5; --pitch:#0d6762; --pitch-soft:#d2eeeb;
   --ochre:#87540b; --ochre-soft:#f6e8cc; --ko:#a32832; --ko-soft:#f8dcdf;
-  --sea:#c6e5ee; --land:#f3f7f2; --land-host:#d8ecc6; --border:#93b49b; --route:#a32832; --grass:#86c77c; --grass-alt:#7bbd71; --stand:#cfe6d2; --boards:#1f6e35; --rope:#ffffff; --strip:#dcc896; --pin:#8b1a2b; --pin-sel:#d7263d; color-scheme:light}
+  --sea:#2f7fc8; --sea-alt:#2a78c1; --land:#f3f7f2; --land-host:#d8ecc6; --border:#93b49b; --route:#a32832; --grass:#86c77c; --grass-alt:#7bbd71; --stand:#cfe6d2; --boards:#1f6e35; --rope:#ffffff; --strip:#dcc896; --pin:#8b1a2b; --pin-sel:#d7263d; color-scheme:light}
 /* Sunset: warm yellow ground, cream cards, red accent */
 :root[data-theme="sunset"]{
   --bg:#fff1c2; --g1:#ffef9a; --g2:#ffe3b0; --g3:#ffe0dc; --surface:#fffbea; --sunk:#fde39a; --fg:#3b1206; --muted:#7c2d12; --line:#f2cf7a;
   --accent:#c81e1e; --accent-soft:#fcdcd3; --pitch:#2f6a1f; --pitch-soft:#e2f0cf;
   --ochre:#8a4b00; --ochre-soft:#ffe3a6; --ko:#7f1d4e; --ko-soft:#f7d6e4;
-  --sea:#ffe7a1; --land:#fffbea; --land-host:#ffe08a; --border:#c9962e; --route:#c81e1e; --grass:#9fcb6b; --grass-alt:#93c160; --stand:#ffe3a0; --boards:#c81e1e; --rope:#ffffff; --strip:#d9b25e; --pin:#9b0d23; --pin-sel:#e11d2e; color-scheme:light}
+  --sea:#2f7fc8; --sea-alt:#2a78c1; --land:#fffbea; --land-host:#ffe08a; --border:#c9962e; --route:#c81e1e; --grass:#9fcb6b; --grass-alt:#93c160; --stand:#ffe3a0; --boards:#c81e1e; --rope:#ffffff; --strip:#d9b25e; --pin:#9b0d23; --pin-sel:#e11d2e; color-scheme:light}
 
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.5}
@@ -229,6 +229,9 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .map svg{display:block;width:100%;height:auto;font-family:var(--font-body)}
 .sea{fill:url(#mow)}
 .mow-a{fill:var(--grass)} .mow-b{fill:var(--grass-alt)}
+/* Cloudy, Misty Dew and Hot Day: the oceans inside the ground are striped sea blue (Day Night keeps the dark grass) */
+:root:not([data-theme="dark"]) .mow-a{fill:var(--sea)} :root:not([data-theme="dark"]) .mow-b{fill:var(--sea-alt)}
+:root:not([data-theme="dark"]) .ocean{fill:#ffffff;opacity:.92}
 .stands{fill:var(--stand)}
 .roof{fill:none;stroke:var(--line);stroke-width:4}
 .benchg{cursor:pointer;outline:none}
