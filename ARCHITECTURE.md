@@ -222,4 +222,4 @@ Every change is one edit to `index.html` pushed to `main`, and both hosts redepl
 - Fixtures are typed in by hand from the ICC schedule, and start times come from Wikipedia. South Africa v New Zealand (match 8) uses 8 October, the date in the ICC media release.
 - Qualifier A/B and the three Super Series sides are placeholders until the qualifying tournament in March 2027.
 - On phones, bench text is about 4–5 px when all 57 matches show; tapping a bench opens its details.
-- The crowd wave is drawn over the benches and briefly pales the labels it passes; it can be switched off.
+- The crowd wave is a faint, soft-edged glow in the theme's accent colour drawn over the benches; labels stay readable as it passes, and it can be switched off.

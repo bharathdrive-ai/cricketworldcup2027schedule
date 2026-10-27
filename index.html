@@ -266,7 +266,8 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .mcard b{font-size:16px}
 .mcard span{font-size:13px;color:var(--muted)}
 .mcard .opt{justify-self:start;margin-top:4px}
-.wave{fill:var(--rope);opacity:.6;pointer-events:none}
+.wave{fill:url(#waveGrad);opacity:.16;pointer-events:none}
+.wave-stop{stop-color:var(--accent)}
 .wavebtn{font:inherit;font-size:12px;font-weight:600;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 12px;cursor:pointer;margin-left:auto}
 .wavebtn[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .wavebtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -826,7 +827,7 @@ try{ const w = localStorage.getItem("cwc27wave"); waveOn = w ? w==="on" : !match
 function waveSVG(){
   if(!waveOn) return "";
   const r=760, a=16*Math.PI/180, p=(t)=>(400+r*Math.cos(t)).toFixed(1)+","+(400+r*Math.sin(t)).toFixed(1);
-  return `<g clip-path="url(#standRing)"><path class="wave" d="M400,400L${p(-a)}A${r},${r} 0 0,1 ${p(a)}Z"><animateTransform attributeName="transform" type="rotate" from="0 400 400" to="360 400 400" dur="14s" repeatCount="indefinite"></animateTransform></path></g>`;
+  return `<defs><linearGradient id="waveGrad" x1="0" y1="0" x2="0" y2="1"><stop class="wave-stop" offset="0" stop-opacity="0"/><stop class="wave-stop" offset=".5" stop-opacity="1"/><stop class="wave-stop" offset="1" stop-opacity="0"/></linearGradient></defs><g clip-path="url(#standRing)"><path class="wave" d="M400,400L${p(-a)}A${r},${r} 0 0,1 ${p(a)}Z"><animateTransform attributeName="transform" type="rotate" from="0 400 400" to="360 400 400" dur="14s" repeatCount="indefinite"></animateTransform></path></g>`;
 }
 
 function renderMap(list){
