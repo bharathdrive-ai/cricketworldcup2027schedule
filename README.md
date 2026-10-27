@@ -17,6 +17,10 @@ An interactive schedule for the ICC Men's Cricket World Cup 2027 (2 October – 
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for the system, data model, user flow, sequence and deployment diagrams.
 
+## Schedule PDF
+
+[CWC2027_Schedule_Reference.pdf](CWC2027_Schedule_Reference.pdf) is a 9-page printable reference built from the same data as the site: stages, venues, teams and groups, all 57 fixtures and fixtures by team. Its text can be extracted, so it also works as a source document for CAG or RAG examples. It is a compiled reference, not an official ICC publication.
+
 ## Data
 
 Fixtures are from the ICC's announced schedule, cross-checked with Wikipedia. Start times (10:00 day, 12:30 day/night, local SAST) come from Wikipedia. Qualifier slots and the Super Series teams are decided at the World Cup Qualifier (Feb–Mar 2027). Super 7 slots show the pre-seeded teams. Country borders are from Natural Earth (public domain) via world-atlas.
