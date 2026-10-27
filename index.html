@@ -297,7 +297,6 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .pin.sel .dot{fill:var(--pin-sel)}
 .pin.sel .halo{fill:var(--pin-sel);opacity:.3}
 .pin.sel text{font-weight:700}
-.pin text.b{font-weight:700}
 .pin.focus .halo,.pin:hover .halo,.pin:focus-visible .halo{opacity:.35}
 .pin:focus-visible .dot{stroke:var(--fg)}
 .route{fill:none;stroke:var(--route);stroke-width:2;stroke-dasharray:6 4;opacity:.85}
@@ -710,24 +709,24 @@ const proj = (lat,lon)=>{ const [x,y]=proj0(lat,lon); return [400+MAPS*(x-MAPCX)
 const COORD = { // lat, lon, label anchor (dx, dy, text-anchor)
   "Cape Town":[-33.974,18.469,12,0,"start"], "Paarl":[-33.736,18.962,0,-16,"middle"],
   "Johannesburg":[-26.132,28.057,12,8,"start"], "Centurion":[-25.860,28.180,11,-6,"start"],
-  "Bloemfontein":[-29.117,26.207,11,-3,"start"], "Durban":[-29.851,31.029,11,4,"start"],
+  "Bloemfontein":[-29.117,26.207,-11,0,"end"], "Durban":[-29.851,31.029,11,4,"start"],
   "KuGompo City":[-33.017,27.904,-12,5,"end"], "Gqeberha":[-33.962,25.612,0,22,"middle"],
   "Harare":[-17.814,31.051,-12,5,"end"], "Bulawayo":[-20.157,28.592,11,4,"start"],
   "Victoria Falls":[-17.930,25.830,-11,4,"end"], "Windhoek":[-22.560,17.080,11,4,"start"],
 };
-const CLABEL = {"South Africa":[-30.6,22.3],"Namibia":[-20.4,17.6],"Zimbabwe":[-19.3,30.4],"Botswana":[-22.4,24.0],"Mozambique":[-22.6,33.4],"Zambia":[-15.6,27.4],"Angola":[-15.8,15.6],"Lesotho":[-29.5,28.3],"eSwatini":[-26.5,31.9]};
+const CLABEL = {"South Africa":[-30.6,22.3],"Namibia":[-20.4,17.6],"Zimbabwe":[-19.3,30.4],"Botswana":[-22.4,24.0],"Mozambique":[-22.6,33.4],"Zambia":[-15.6,27.4],"Angola":[-15.8,15.6],"Lesotho":[-29.5,28.3]};
 let focusVenue = "";
 const COORD_NARROW = { // dx, dy, anchor used at phone width
-  "Harare":[-12,16,"end"], "Durban":[0,38,"middle"], "Bulawayo":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
-  "KuGompo City":[0,-16,"middle"], "Gqeberha":[24,36,"middle"], "Johannesburg":[12,12,"start"],
+  "Harare":[-38,16,"middle"], "Durban":[0,38,"middle"], "Bulawayo":[-12,4,"end"], "Bloemfontein":[-12,4,"end"],
+  "KuGompo City":[12,-16,"middle"], "Gqeberha":[24,36,"middle"], "Johannesburg":[12,12,"start"],
   "Centurion":[12,-8,"start"], "Paarl":[12,-10,"start"], "Cape Town":[12,-14,"start"], "Victoria Falls":[-14,40,"end"],
 };
 const narrow = ()=>matchMedia("(max-width:760px)").matches;
 // Close pairs (Johannesburg/Centurion ~30 km; Paarl ~50 km from Cape Town, which stays on its coast): pins drawn slightly apart so they don't overlap
 const NUDGE = {"Johannesburg":[-12,16], "Centurion":[12,-16], "Paarl":[18,-38]};
 const WRAP = new Set(["Cape Town"]);
-const BOLD = new Set(["Johannesburg"]); // Final venue: bold label // labels split over two lines to stay inside the boundary
-const NUDGE_NARROW = {"Paarl":[18,-62]}; // phones: lift Paarl further so the larger two-line Cape Town label fits below it
+// (WRAP: labels split over two lines to stay inside the boundary)
+const NUDGE_NARROW = {"Paarl":[18,-62], "Johannesburg":[-20,16]}; // phones: lift Paarl further so the larger two-line Cape Town label fits below it
 const pinXY = c=>{ const [tx,ty]=proj(COORD[c][0],COORD[c][1]), [nx,ny]=(narrow()&&NUDGE_NARROW[c])||NUDGE[c]||[0,0]; return [tx+nx, ty+ny, tx, ty]; };
 
 // ---- stand benches: one curved bench per match shown, in date order clockwise from the top ----
@@ -845,6 +844,19 @@ function toggleBenchFilter(g){
   const again=document.querySelector(`svg .catg[data-kind="${k}"][data-key="${CSS.escape(key)}"]`); if(again) again.focus({preventScroll:true});
 }
 // shrink any bench label that spills past its own bench outline (measured, so it holds for every font)
+// gap between a venue pin's edge and its name, the same for every venue (map units)
+const VGAP = 8;
+// after drawing: nudge each side label so its rendered edge (not its nominal anchor point) is exactly VGAP from the pin,
+// which evens out letter and digit shapes (e.g. the "J" of Johannesburg or a trailing "2")
+function fitVenueLabels(){
+  document.querySelectorAll(".map svg .pin").forEach(g=>{
+    const t=g.querySelector("text"), d=g.querySelector(".dot"), anc=t.getAttribute("text-anchor"); if(anc==="middle") return;
+    const cx=+d.getAttribute("cx"), r=+d.getAttribute("r"), b=t.getBBox(); if(!b.width) return;
+    const shift = anc==="start" ? (cx+r+VGAP) - b.x : (cx-r-VGAP) - (b.x+b.width);
+    if(Math.abs(shift)<.05) return;
+    [t, ...t.querySelectorAll("tspan[x]")].forEach(e=>e.setAttribute("x", (+e.getAttribute("x")+shift).toFixed(1)));
+  });
+}
 function fitBenches(){
   const svg = document.querySelector(".map svg"); if(!svg) return;
   let inv; try{ inv = svg.getCTM().inverse(); }catch(e){ return; }
@@ -865,7 +877,7 @@ function fitBenches(){
   });
 }
 // web fonts can arrive after the first draw and change text widths: fit again once they're ready
-try{ document.fonts && document.fonts.ready.then(()=>{ if(state.view==="venues") fitBenches(); }); }catch(e){}
+try{ document.fonts && document.fonts.ready.then(()=>{ if(state.view==="venues"){ fitBenches(); fitVenueLabels(); } }); }catch(e){}
 let waveOn = true;
 try{ const w = localStorage.getItem("cwc27wave"); waveOn = w ? w==="on" : !matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
 function waveSVG(){
@@ -897,16 +909,21 @@ function renderMap(list){
   const pins = order.map(c=>{
     const [dx,dy,anc] = (narrow() && COORD_NARROW[c]) || COORD[c].slice(2), [x,y] = pinXY(c), n = counts[c]||0;
     const r = n ? 5.5 + 1.9*Math.sqrt(n) : 5.5;
-    // labels move out by however much the dot grew, so the bigger pin never covers its name
-    const pad = r - (n ? 4 + 1.5*Math.sqrt(n) : 4);
-    const lx = x + dx + (dx ? Math.sign(dx)*pad : 0), ly = y + dy + (dx ? 0 : Math.sign(dy)*pad);
+    // every label sits the same distance (GAP) from the edge of its pin, whatever the pin size:
+    // beside the pin (start/end) its capitals are centred on the pin; above or below, its baseline / cap tops are GAP away
+    const fs = narrow() ? 41 : 26, gap = VGAP, CAP = .72, lines = WRAP.has(c) ? 2 : 1;
+    let lx, ly;
+    // (phones keep their tuned vertical offsets, which keep the larger labels apart; the gap from the pin is still fixed)
+    if(anc!=="middle"){ lx = x + (anc==="start" ? 1 : -1)*(r + gap); ly = narrow() ? y + dy : y + CAP*fs/2 - (lines-1)*fs/2; }
+    else if(dy<0){ lx = x + dx; ly = y - r - gap - (lines-1)*fs; }
+    else { lx = x + dx; ly = y + r + gap + CAP*fs; }
     const cls = ["pin", n?"":"none", state.venues.has(c)?"sel":"", c===focusVenue?"focus":""].join(" ");
     return `<g class="${cls}" data-pin="${esc(c)}" tabindex="0" role="button" aria-pressed="${state.venues.has(c)}" aria-label="${esc(c)}, ${n} matches shown">
       <circle class="halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r+5).toFixed(1)}"></circle>
       <circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"></circle>
-      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anc}"${BOLD.has(c)?' class="b"':""}>${WRAP.has(c)
-        ? c.split(" ").map((w,i,a)=>`<tspan x="${lx.toFixed(1)}"${i?' dy="1em"':""}>${esc(w)}${i===a.length-1&&n?` <tspan class="n">${n}</tspan>`:""}</tspan>`).join("")
-        : `${esc(c)}${n?` <tspan class="n">${n}</tspan>`:""}`}</text>
+      <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anc}">${WRAP.has(c)
+        ? c.split(" ").map((w,i,a)=>`<tspan x="${lx.toFixed(1)}"${i?' dy="1em"':""}>${esc(w)}${i===a.length-1&&n?`<tspan class="n" dx=".3em">${n}</tspan>`:""}</tspan>`).join("")
+        : `${esc(c)}${n?`<tspan class="n" dx=".3em">${n}</tspan>`:""}`}</text>
     </g>`;
   }).join("");
   return `<div class="mapwrap">
@@ -1007,7 +1024,7 @@ function renderActive(){
 function render(){
   const list = filtered();
   $("#out").innerHTML = state.view==="list"?renderList(list):state.view==="cal"?renderCal(list):renderVenues(list);
-  if(state.view==="venues") fitBenches();
+  if(state.view==="venues"){ fitBenches(); fitVenueLabels(); }
   hlNow = ""; // the map was redrawn, so no bench is highlighted any more
   $("#count").textContent = `${list.length} of ${matches.length} matches`;
   $("#reset").hidden = !anySelection();
