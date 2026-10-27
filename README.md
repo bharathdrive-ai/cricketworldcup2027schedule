@@ -20,6 +20,14 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the system, data model, user flow, se
 ## Schedule PDF
 
 [CWC2027_Schedule_Reference.pdf](CWC2027_Schedule_Reference.pdf) is a 9-page printable reference built from the same data as the site: stages, venues, teams and groups, all 57 fixtures and fixtures by team. Its text can be extracted, so it also works as a source document for CAG or RAG examples. It is a compiled reference, not an official ICC publication.
+## Ask the schedule (CAG agent)
+
+The **Ask the schedule** button opens a chat assistant that answers questions about fixtures, venues, stages and start times. It uses cache-augmented generation (CAG): the Vercel function [`api/ask.js`](api/ask.js) sends the whole schedule PDF to Gemini as the first part of every request, so answers come only from that document, and Gemini's implicit cache reuses it between questions (about 5,000 tokens per question, most of them cached; answers in 2–5 seconds).
+
+- Runs on Vercel; the GitHub Pages copy calls the Vercel endpoint. The button appears only when the function has a key.
+- Needs the Vercel environment variable `GOOGLE_API_KEY` (optional `GEMINI_MODELS`, default `gemini-3.5-flash-lite,gemini-3.6-flash`).
+- Limits: 500-character questions, the last 6 messages as context, and 8 questions a minute per visitor.
+- After changing a fixture, rebuild the PDF with [`tools/build-pdf.js`](tools/build-pdf.js) so the assistant stays in step with the site.
 
 ## Data
 

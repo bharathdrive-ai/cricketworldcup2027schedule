@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/ask.js": {
+      "includeFiles": "CWC2027_Schedule_Reference.pdf",
+      "maxDuration": 60
+    }
+  }
+}
