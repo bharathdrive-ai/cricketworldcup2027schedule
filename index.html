@@ -412,6 +412,17 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
   </div>
 
   <div class="format" id="format" role="group" aria-label="Filter by stage"></div>
+  <div class="controls">
+    <div class="active" id="active" aria-live="polite"></div>
+    <input id="q" type="search" placeholder="Search teams, cities, stadiums" aria-label="Search">
+    <div class="seg" role="group" aria-label="View">
+      <button data-view="venues" aria-pressed="true">Map</button>
+      <button data-view="list" aria-pressed="false">List</button>
+      <button data-view="cal" aria-pressed="false">Calendar</button>
+    </div>
+    <div class="count"><span id="count"></span> <button class="reset" id="reset" hidden>Clear all selections</button></div>
+  </div>
+
   <details class="explain">
     <summary>How the new format works</summary>
     <ul>
@@ -451,17 +462,6 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
       <div class="chips" id="stageChips"></div>
     </div>
   </section>
-
-  <div class="controls">
-    <div class="active" id="active" aria-live="polite"></div>
-    <input id="q" type="search" placeholder="Search teams, cities, stadiums" aria-label="Search">
-    <div class="seg" role="group" aria-label="View">
-      <button data-view="venues" aria-pressed="true">Map</button>
-      <button data-view="list" aria-pressed="false">List</button>
-      <button data-view="cal" aria-pressed="false">Calendar</button>
-    </div>
-    <div class="count"><span id="count"></span> <button class="reset" id="reset" hidden>Clear all selections</button></div>
-  </div>
 
   <div id="teampanel"></div>
   <main id="out"></main>
