@@ -66,7 +66,7 @@ h1 span{color:var(--accent)}
 .hosts{margin-top:10px;color:var(--muted);font-size:18px;font-weight:600;letter-spacing:.01em}
 @media (max-width:640px){.hosts{font-size:16px}}
 .countdown{display:flex;gap:10px}
-.cd{background:var(--fg);color:var(--bg);padding:8px 10px;min-width:62px;text-align:center;border-radius:4px}
+.cd{background:var(--fg);color:var(--bg);padding:8px 10px;min-width:74px;box-sizing:border-box;text-align:center;border-radius:4px}
 .cd b{display:block;font-family:var(--font-display);font-size:34px;font-weight:800;line-height:1}
 .cd small{font-size:10px;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
 .cd-label{font-size:12px;color:var(--muted);margin-top:6px;white-space:nowrap;text-align:justify;text-align-last:justify}
@@ -1144,7 +1144,7 @@ function tick(){
   let html, label;
   if(now<start){
     let s=Math.floor((start-now)/1000); const d=Math.floor(s/86400); s%=86400; const h=Math.floor(s/3600); const m=Math.floor(s%3600/60);
-    html=[[d,"days"],[h,"hrs"],[m,"min"]].map(([v,l])=>`<div class="cd"><b class="mono">${String(v).padStart(l==="days"?1:2,"0")}</b><small>${l}</small></div>`).join("");
+    html=[[d,"days"],[h,"hours"],[m,"minutes"]].map(([v,l])=>`<div class="cd"><b class="mono">${String(v).padStart(l==="days"?1:2,"0")}</b><small>${l}</small></div>`).join("");
     label="to the first ball in CWC 2027 Edition";
   } else if(now<end){ html=`<div class="cd"><b>LIVE</b><small>in progress</small></div>`; label="Tournament under way"; }
   else { html=`<div class="cd"><b>DONE</b><small>completed</small></div>`; label="Final played 21 Nov 2027"; }
