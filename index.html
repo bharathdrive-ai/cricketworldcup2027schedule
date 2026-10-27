@@ -289,19 +289,21 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .clab.host{font-family:var(--font-display);font-size:33px;font-weight:800;letter-spacing:.08em;opacity:.45;fill:var(--fg)}
 .pin{cursor:pointer;outline:none}
 .pin .dot{fill:var(--pin);stroke:var(--surface);stroke-width:2.5}
-.pin .halo{fill:var(--pin);opacity:0}
+.pin .halo{fill:var(--pin);opacity:.3} /* soft glow behind every venue with matches */
+.pin.none .halo{opacity:0}
 .pin text{font-size:26px;font-weight:600;fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
 .pin text .n{font-family:var(--font-mono);font-size:23px;fill:var(--pin);font-weight:600}
 .pin.none .dot{fill:var(--surface);stroke:var(--muted);stroke-width:1.5}
 .pin.none text{fill:var(--muted);font-weight:500}
 .pin.sel .dot{fill:var(--pin-sel)}
-.pin.sel .halo{fill:var(--pin-sel);opacity:.3}
+.pin.sel .halo{fill:var(--pin-sel);opacity:.75}
 .pin.sel text{font-weight:700}
-.pin.focus .halo,.pin:hover .halo,.pin:focus-visible .halo{opacity:.35}
+.pin.focus .halo,.pin:hover .halo,.pin:focus-visible .halo{opacity:.7}
 .pin:focus-visible .dot{stroke:var(--fg)}
 .route{fill:none;stroke:var(--route);stroke-width:2;stroke-dasharray:6 4;opacity:.85}
 .arrow{fill:var(--route)}
-@media (prefers-reduced-motion:no-preference){.pin .halo{transition:opacity .15s}.route{animation:march 1.2s linear infinite}}
+@keyframes pinglow{0%,100%{opacity:.75}50%{opacity:.35}}
+@media (prefers-reduced-motion:no-preference){.pin .halo{transition:opacity .15s}.pin.sel .halo{animation:pinglow 2.4s ease-in-out infinite}.route{animation:march 1.2s linear infinite}}
 @keyframes march{to{stroke-dashoffset:-20}}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;padding:10px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
 .legend span{display:inline-flex;gap:6px;align-items:center}
@@ -919,7 +921,7 @@ function renderMap(list){
     else { lx = x + dx; ly = y + r + gap + CAP*fs; }
     const cls = ["pin", n?"":"none", state.venues.has(c)?"sel":"", c===focusVenue?"focus":""].join(" ");
     return `<g class="${cls}" data-pin="${esc(c)}" tabindex="0" role="button" aria-pressed="${state.venues.has(c)}" aria-label="${esc(c)}, ${n} matches shown">
-      <circle class="halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r+5).toFixed(1)}"></circle>
+      <circle class="halo" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(r+9).toFixed(1)}" filter="url(#pinGlow)"></circle>
       <circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"></circle>
       <text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anc}">${WRAP.has(c)
         ? c.split(" ").map((w,i,a)=>`<tspan x="${lx.toFixed(1)}"${i?' dy="1em"':""}>${esc(w)}${i===a.length-1&&n?`<tspan class="n" dx=".3em">${n}</tspan>`:""}</tspan>`).join("")
@@ -932,6 +934,7 @@ function renderMap(list){
         <defs>
           <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0L10,5L0,10z" class="arrow"></path></marker>
           <pattern id="mow" width="84" height="10" patternUnits="userSpaceOnUse"><rect width="42" height="10" class="mow-a"></rect><rect x="42" width="42" height="10" class="mow-b"></rect></pattern>
+          <filter id="pinGlow" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="6"></feGaussianBlur></filter>
           <clipPath id="field"><ellipse cx="400" cy="400" rx="438" ry="418"></ellipse></clipPath>
           <clipPath id="standRing"><path clip-rule="evenodd" d="M-260,400a660,620 0 1,0 1320,0a660,620 0 1,0 -1320,0ZM-58,400a458,418 0 1,0 916,0a458,418 0 1,0 -916,0Z"></path></clipPath>
         </defs>
