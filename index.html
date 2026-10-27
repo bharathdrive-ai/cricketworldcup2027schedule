@@ -709,13 +709,13 @@ function filterBenchItems(){
 }
 function benchesSVG(){
   const items = [{gap:true, header:"MATCHES"}].concat(filtered().map(m=>({kind:"match", m})), filterBenchItems());
-  // two 168deg arcs either side of the sightscreens (top 270deg, bottom 90deg)
+  // one continuous ring of benches, clockwise from just after the top sightscreen back round to just before it
   // stage (1.3x), venue and team (1.2x) benches are wider so their names can be larger
   const wOf = it => it.gap ? (it.header ? 1.5 : 1) : it.kind==="stage" ? 1.3 : (it.kind==="venue"||it.kind==="team") ? 1.2 : 1;
-  // gaps of 7.2deg behind each sightscreen (top 270, bottom 90)
-  const SPAN = 172.8;
+  // a 7.2deg gap behind the top sightscreen only, so the match list never breaks mid-way
+  const SPAN = 352.8;
   const place = (arr,start)=>{ const tot=arr.reduce((t,it)=>t+wOf(it),0); let c=0; arr.forEach(it=>{ const w=wOf(it); it._d=[start+c*SPAN/tot, start+(c+w)*SPAN/tot]; c+=w; }); };
-  const lay = ()=>{ const W = items.reduce((t,it)=>t+wOf(it),0), arc1=[], arc2=[]; let acc = 0; items.forEach(it=>{ (acc < W/2 ? arc1 : arc2).push(it); acc += wOf(it); }); place(arc1,273.6); place(arc2,93.6); };
+  const lay = ()=>place(items, 273.6);
   lay();
   // a header sits at the TOP of its group: on the right-hand arc benches run downward (header first, as listed);
   // on the left-hand arc they run upward, so the header moves to the group end and a plain gap keeps the groups apart
@@ -858,7 +858,7 @@ function renderMap(list){
         <ellipse class="stands" cx="400" cy="400" rx="662" ry="622"></ellipse>
         ${benchesSVG()}${waveSVG()}
         <rect class="screen" x="374" y="-34" width="52" height="18" rx="2"></rect>
-        <rect class="screen" x="374" y="816" width="52" height="18" rx="2"></rect>
+        
         <ellipse class="boards" cx="400" cy="400" rx="450" ry="430"></ellipse>
         <g clip-path="url(#field)">
           <rect x="-40" y="-20" width="880" height="840" class="sea"></rect>
