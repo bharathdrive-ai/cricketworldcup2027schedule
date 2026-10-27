@@ -765,7 +765,8 @@ function filterBenchItems(){
   ["A","B","C","D"].forEach(q=>items.push({kind:"team", key:TBD_KEY, label:"Qualifier "+q, // letters, matching the fixtures (Qualifier A / B)
     n:0, on:state.teams.has(TBD_KEY)}));
   const relSel = anySelection() ? relatedSets(filtered()) : null;
-  if(relSel) items.forEach(it=>{ if(!it.gap && !it.on) it.rel = relatedHit(it.kind, it.key, relSel); });
+  const teamPicked = state.teams.size>0; // a team lights its dates and venues only, not its opponents or stages
+  if(relSel) items.forEach(it=>{ if(!it.gap && !it.on) it.rel = (!teamPicked || it.kind==="venue") && relatedHit(it.kind, it.key, relSel); });
   return items;
 }
 function benchesSVG(){
@@ -1099,7 +1100,8 @@ function benchHL(kind, key){
   svg.querySelectorAll(".benchg").forEach(g=>{
     let on = false;
     if(kind){
-      if(g.classList.contains("catg")) on = relatedHit(g.dataset.kind, g.dataset.key, relSet);
+      if(g.classList.contains("catg")) on = kind==="team" && g.dataset.kind!=="venue" ? (g.dataset.kind==="team" && g.dataset.key===key)
+        : relatedHit(g.dataset.kind, g.dataset.key, relSet);
       else { const m = matches.find(x=>x.no===+g.dataset.match); on = !!m && benchMatchHit(m, kind, key); }
     }
     g.classList.toggle("hl", on);
