@@ -717,7 +717,7 @@ const MAPS = 1.05, MAPCX = 474, MAPCY = 426; // map sits ~13 units high in the g
 const proj0 = (lat,lon)=>[(lon-11)*MAPK*MAPC, (-15-lat)*MAPK];
 const proj = (lat,lon)=>{ const [x,y]=proj0(lat,lon); return [400+MAPS*(x-MAPCX), 400+MAPS*(y-MAPCY)]; };
 const COORD = { // lat, lon, label anchor (dx, dy, text-anchor)
-  "Cape Town":[-33.974,18.469,12,0,"start"], "Paarl":[-33.736,18.962,0,-16,"middle"],
+  "Cape Town":[-33.974,18.469,12,0,"start"], "Paarl":[-33.736,18.962,-11,0,"end"],
   "Johannesburg":[-26.132,28.057,12,8,"start"], "Centurion":[-25.860,28.180,11,-6,"start"],
   "Bloemfontein":[-29.117,26.207,-11,0,"end"], "Durban":[-29.851,31.029,11,4,"start"],
   "KuGompo City":[-33.017,27.904,-12,5,"end"], "Gqeberha":[-33.962,25.612,0,22,"middle"],
@@ -908,7 +908,7 @@ function renderMap(list){
   const counts = {}; list.forEach(m=>counts[m.city]=(counts[m.city]||0)+1);
   const lands = GEO.map(g=>`<path d="${g.d}" class="${g.kind==="host"?"land host":"land"}"><title>${g.name}</title></path>`).join("");
   // [line 1, line 2, lat, lon, phone lat, phone lon, note]
-  const OCEANS = [["Atlantic","Ocean",-32.0,16.5,-31.0,15.9,"Cold Benguela Current flows north along this coast"],["Indian","Ocean",-32.0,32.2,-33.7,31.0,"Warm Agulhas Current flows south along this coast"]];
+  const OCEANS = [["Atlantic","Ocean",-31.6,16.5,-31.0,15.9,"Cold Benguela Current flows north along this coast"],["Indian","Ocean",-32.0,32.2,-33.7,31.0,"Warm Agulhas Current flows south along this coast"]];
   const oceans = OCEANS.map(([a,b,la,lo,pla,plo,note])=>{ const [x,y]=narrow()?proj(pla,plo):proj(la,lo); return `<text class="ocean" x="${x.toFixed(0)}" y="${(y-8).toFixed(0)}" text-anchor="middle"><title>${a} ${b}: ${note}</title><tspan x="${x.toFixed(0)}">${a}</tspan><tspan x="${x.toFixed(0)}" dy="1.15em">${b}</tspan></text>`; }).join("");
   const clabels = Object.entries(CLABEL).map(([n,[la,lo]])=>{ const [x,y]=proj(la,lo); const host=["South Africa","Namibia","Zimbabwe"].includes(n);
     return `<text x="${x.toFixed(0)}" y="${y.toFixed(0)}" class="${host?"clab host":"clab"}" text-anchor="middle">${n==="eSwatini"?"ESW.":n==="Lesotho"?"LES.":n.toUpperCase()}</text>`}).join("");
