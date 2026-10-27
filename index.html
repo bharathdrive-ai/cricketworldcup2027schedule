@@ -231,8 +231,8 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .roof{fill:none;stroke:var(--line);stroke-width:4}
 .benchg{cursor:pointer;outline:none}
 .bhead{pointer-events:none}
-.bhead text{font-family:var(--font-display);font-weight:800;letter-spacing:.12em;fill:var(--accent)}
-.bhead-rule{stroke:var(--accent);stroke-width:2;opacity:.55}
+.bhead .bench{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.4}
+.bhead text{font-family:var(--font-display);font-weight:800;letter-spacing:.08em;fill:var(--accent);fill:color-mix(in srgb,var(--accent) 75%,var(--fg));paint-order:stroke;stroke:var(--accent-soft);stroke-width:3px;stroke-linejoin:round}
 .bench{fill:var(--sv-soft);stroke:var(--sv);stroke-width:1.4}
 .btxt{font-family:var(--font-body);font-weight:700;fill:var(--fg);pointer-events:none}
 .btxt .bt2{font-weight:700}
@@ -730,12 +730,14 @@ function benchesSVG(){
   return items.map((it,i)=>{
     if(it.gap){
       if(!it.header) return "";
-      // section header in its own slot: radial text at the wide outer end, divider lines either side
-      const [h0,h1] = it._d, hm=(h0+h1)/2, A=((hm%360)+360)%360, flip = A>90 && A<270;
-      const arcH = (h1-h0)*Math.PI/180*(RO[0]-15), FH = Math.min(22, arcH*0.7/1.15, depth*0.92/(0.62*it.header.length));
+      // section header drawn as a bench of its own: same wedge, border and lettering as the benches, in the accent tint
+      let [h0,h1] = it._d; const hspan=h1-h0, hgap=Math.min(0.25, hspan*0.06); h0+=hgap; h1-=hgap;
+      const hl = h1-h0>180?1:0, q0=ept(RO[0],RO[1],h0), q1=ept(RO[0],RO[1],h1), r1=ept(RI[0],RI[1],h1), r0=ept(RI[0],RI[1],h0);
+      const hpath = `M${f1(q0[0])},${f1(q0[1])}A${RO[0]},${RO[1]} 0 ${hl},1 ${f1(q1[0])},${f1(q1[1])}L${f1(r1[0])},${f1(r1[1])}A${RI[0]},${RI[1]} 0 ${hl},0 ${f1(r0[0])},${f1(r0[1])}Z`;
+      const hm=(h0+h1)/2, A=((hm%360)+360)%360, flip = A>90 && A<270;
+      const arcH = (h1-h0)*Math.PI/180*(RO[0]-15), FH = Math.min(28, arcH*0.92/1.15, depth*0.97/(0.5*it.header.length));
       const pos = ept((RI[0]+RO[0])/2, (RI[1]+RO[1])/2, hm), rot = hm + (flip ? 180 : 0);
-      const tick = d => { const a=ept(RI[0],RI[1],d), b=ept(RO[0],RO[1],d); return `M${f1(a[0])},${f1(a[1])}L${f1(b[0])},${f1(b[1])}`; };
-      return `<g class="bhead" aria-hidden="true"><path class="bhead-rule" d="${tick(h0)}${tick(h1)}"></path><text transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*FH)}" style="font-size:${f1(FH)}px">${it.header}</text></g>`;
+      return `<g class="bhead" aria-hidden="true"><path class="bench" d="${hpath}"></path><text transform="translate(${f1(pos[0])},${f1(pos[1])}) rotate(${f1(rot)})" text-anchor="middle" y="${f1(0.35*FH)}" style="font-size:${f1(FH)}px">${it.header}</text></g>`;
     }
     let [d0,d1] = it._d; const span=d1-d0, gap=Math.min(0.25, span*0.06); d0+=gap; d1-=gap;
     const large = d1-d0>180?1:0, o0=ept(RO[0],RO[1],d0), o1=ept(RO[0],RO[1],d1), i1=ept(RI[0],RI[1],d1), i0=ept(RI[0],RI[1],d0);
@@ -784,7 +786,7 @@ function toggleBenchFilter(g){
 function fitBenches(){
   const svg = document.querySelector(".map svg"); if(!svg) return;
   let inv; try{ inv = svg.getCTM().inverse(); }catch(e){ return; }
-  svg.querySelectorAll(".benchg").forEach(g=>{
+  svg.querySelectorAll(".benchg, .bhead").forEach(g=>{
     const t = g.querySelector("text"), p = g.querySelector(".bench");
     try{
       for(let i=0;i<20;i++){
