@@ -1042,6 +1042,7 @@ function benchMatchHit(m, kind, key){
   if(kind==="venue") return m.city===key;
   if(kind==="team") return key===TBD_KEY ? (TBD.test(m.home.name)||TBD.test(m.away.name)) : (m.home.name===key||m.away.name===key);
   if(kind==="date") return m.iso===key;
+  if(kind==="match") return m.no===+key;
   if(kind==="stage") return key.split(",").includes(m.cls);
   return false;
 }
@@ -1066,6 +1067,7 @@ function hlTarget(el){
   let t;
   if((t=el.closest("[data-pin]"))) return ["venue", t.dataset.pin];
   if((t=el.closest("svg .catg"))) return [t.dataset.kind, t.dataset.key];
+  if((t=el.closest("svg .benchg[data-match]"))) return ["match", t.dataset.match]; // a match (date) bench lights its teams, venue and stage
   if((t=el.closest("#venueChips [data-venue], .vlink[data-venue]"))) return ["venue", t.dataset.venue];
   if((t=el.closest("[data-vcard]"))) return ["venue", t.dataset.vcard];
   if((t=el.closest("#teamChips [data-team], .team[data-team]"))) return ["team", t.dataset.team];
