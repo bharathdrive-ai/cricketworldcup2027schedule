@@ -11,7 +11,7 @@ An interactive schedule for the ICC Men's Cricket World Cup 2027 (2 October – 
 - Head-to-head view when two teams are selected
 - Map, list and calendar views
 - Map drawn inside a cricket ground: venue pins with match counts, and stands made of benches for every match plus stage, venue and team filters
-- Themes: System, Light, Dark (default), Green and Sunset; works on phones
+- Themes: Cloudy (light sky blue), Dark Hours (navy, default), Misty Dew (light green) and Mid Hot / Sunny (yellow and red); works on phones
 
 ## Architecture
 
