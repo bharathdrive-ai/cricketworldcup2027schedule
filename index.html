@@ -767,12 +767,15 @@ function filterBenchItems(){
   const items = [{gap:true, header:"STAGES"}];
   STAGE_BENCH.forEach(([name,cls])=>items.push({kind:"stage", key:cls.join(","), label:name, n:matches.filter(m=>cls.includes(m.cls)).length,
     on:cls.every(c=>state.stages.has(c)), cls:cls[0]==="sf"?"sf":cls[0]==="ga"?"ga":cls[0]}));
+  // venue and team benches sit on the left of the ground, where the ring runs bottom-to-top and each heading is at the
+  // top: they are laid out Z→A so that, reading down from the heading, they run A→Z
   items.push({gap:true, header:"VENUES"});
-  Object.keys(VENUES).sort().forEach(v=>items.push({kind:"venue", key:v, label:v, n:matches.filter(m=>m.city===v).length, on:state.venues.has(v), city:v}));
+  items.push(...Object.keys(VENUES).sort().map(v=>({kind:"venue", key:v, label:v, n:matches.filter(m=>m.city===v).length, on:state.venues.has(v), city:v})).reverse());
   items.push({gap:true, header:"TEAMS"});
-  TEAMS.forEach(t=>items.push({kind:"team", key:t, label:t, n:matches.filter(m=>m.home.name===t||m.away.name===t).length, on:state.teams.has(t)}));
-  ["A","B","C","D"].forEach(q=>items.push({kind:"team", key:TBD_KEY, label:"Qualifier "+q, // letters, matching the fixtures (Qualifier A / B)
+  const teamItems = TEAMS.map(t=>({kind:"team", key:t, label:t, n:matches.filter(m=>m.home.name===t||m.away.name===t).length, on:state.teams.has(t)}));
+  ["A","B","C","D"].forEach(q=>teamItems.push({kind:"team", key:TBD_KEY, label:"Qualifier "+q, // letters, matching the fixtures (Qualifier A / B)
     n:0, on:state.teams.has(TBD_KEY)}));
+  items.push(...teamItems.reverse());
   const relSel = anySelection() ? relatedSets(filtered()) : null;
   const teamPicked = state.teams.size>0; // a team lights its dates and venues only, not its opponents or stages
   if(relSel) items.forEach(it=>{ if(!it.gap && !it.on) it.rel = (!teamPicked || it.kind==="venue") && relatedHit(it.kind, it.key, relSel); });
