@@ -102,10 +102,11 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 
 /* picker */
 .picker{margin-top:22px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
-.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs{display:flex;border-bottom:1px solid var(--line);overflow-x:auto;overflow-y:hidden;scrollbar-width:none} /* phones can still swipe the tabs sideways */
+.tabs::-webkit-scrollbar{display:none}
 .tabs button{font:inherit;font-family:var(--font-display);font-weight:800;font-size:20px;text-transform:uppercase;letter-spacing:.02em;padding:12px 18px;border:0;background:none;color:var(--muted);cursor:pointer;position:relative;white-space:nowrap;display:flex;gap:8px;align-items:center}
 .tabs button[aria-selected="true"]{color:var(--fg)}
-.tabs button[aria-selected="true"]::after{content:"";position:absolute;left:12px;right:12px;bottom:-1px;height:3px;background:var(--accent)}
+.tabs button[aria-selected="true"]::after{content:"";position:absolute;left:12px;right:12px;bottom:0;height:3px;background:var(--accent)}
 .tabs button:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
 .badge{font-family:var(--font-body);font-size:11px;font-weight:600;background:var(--accent);color:var(--surface);border-radius:99px;padding:1px 7px;letter-spacing:0}
 .badge:empty{display:none}
