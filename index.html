@@ -1202,7 +1202,10 @@ render();
   // small, safe markdown: escape first, then bold, bullet lists, paragraphs; "Match 9" becomes a link to that fixture
   function md(text){
     let cite = "";
-    text = text.replace(/\s*\[(CWC2027_Schedule_Reference\.pdf[^\]]*)\]\s*$/, (m, c) => { cite = c; return ""; });
+    // one source line at the end: citations repeated after individual lines are removed and their pages merged
+    const pages = new Set();
+    text = text.replace(/\s*\[CWC2027_Schedule_Reference\.pdf,?([^\]]*)\]/g, (m, c) => { c.replace(/pp?\./g, "").split(/[,\s]+/).filter(Boolean).forEach(p => pages.add(p)); return ""; });
+    if(pages.size) cite = "CWC2027_Schedule_Reference.pdf, p. " + [...pages].sort((a, b) => parseInt(a) - parseInt(b)).join(", ");
     const out = []; let list = null;
     escH(text).split(/\n/).forEach(line => {
       const b = line.match(/^\s*(?:[*\-•]|\d+\.)\s+(.*)$/);

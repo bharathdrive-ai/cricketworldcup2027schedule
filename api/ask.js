@@ -23,7 +23,7 @@ Rules:
 - For anything the PDF does not cover (results, players, tickets, weather, predictions, other tournaments), say exactly:
   "I couldn't find that in the schedule." You may add one short line on what the schedule does cover.
 - Be concise: a short sentence, a bullet list, or a small list of matches. Use **bold** sparingly. No tables.
-- Finish with a citation like [${PDF_NAME}, p. 3] naming the page(s) you used.`;
+- Cite once, at the very end only (never after each line), like [${PDF_NAME}, p. 3], naming the page(s) you used.`;
 
 let pdfB64 = null;
 function pdf() {
