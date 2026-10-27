@@ -242,6 +242,12 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .benchg:hover .bench,.benchg:focus-visible .bench,.benchg.on .bench{fill:var(--sv)}
 .benchg:hover .btxt,.benchg:focus-visible .btxt,.benchg.on .btxt{fill:var(--surface)}
 .benchg.atv .bench{stroke-width:4}
+/* cross-highlight: the benches of the venue, team, date or stage being pointed at fill in; the rest fade */
+.map svg.hl-on .benchg:not(.hl){opacity:.32}
+.benchg.hl .bench{fill:var(--sv);fill-opacity:1;stroke-width:2.5}
+.benchg.hl .btxt{stroke:var(--sv)}
+.benchg.hl .btxt tspan{fill:var(--surface)}
+@media (prefers-reduced-motion:no-preference){.benchg{transition:opacity .15s ease}}
 /* bench label polish */
 .btxt{paint-order:stroke;stroke:var(--sv-soft);stroke-width:3px;stroke-linejoin:round}
 .benchg:not(.catg) .bt1{fill:color-mix(in srgb,var(--sv) 70%,var(--fg))}
@@ -930,6 +936,7 @@ function render(){
   const list = filtered();
   $("#out").innerHTML = state.view==="list"?renderList(list):state.view==="cal"?renderCal(list):renderVenues(list);
   if(state.view==="venues") fitBenches();
+  hlNow = ""; // the map was redrawn, so no bench is highlighted any more
   $("#count").textContent = `${list.length} of ${matches.length} matches`;
   $("#reset").hidden = !anySelection();
   // picker state
@@ -1002,6 +1009,47 @@ function setFocusVenue(c, matchNo){
 function benchOrPin(e){ const b=e.target.closest("svg .benchg"); if(b){ if(b.classList.contains("catg")){ if(b.dataset.city) setFocusVenue(b.dataset.city); return; } setFocusVenue(b.dataset.city, +b.dataset.match); return; } const p=e.target.closest("svg [data-pin]"); if(p) setFocusVenue(p.dataset.pin); }
 $("#out").addEventListener("mouseover",benchOrPin);
 $("#out").addEventListener("focusin",benchOrPin);
+// ---- cross-highlight: pointing at a venue, team, date or stage anywhere lights up its benches ----
+function benchMatchHit(m, kind, key){
+  if(kind==="venue") return m.city===key;
+  if(kind==="team") return key===TBD_KEY ? (TBD.test(m.home.name)||TBD.test(m.away.name)) : (m.home.name===key||m.away.name===key);
+  if(kind==="date") return m.iso===key;
+  if(kind==="stage") return key.split(",").includes(m.cls);
+  return false;
+}
+var hlNow = ""; // var: render() resets it and may run before this line
+function benchHL(kind, key){
+  const id = kind ? kind+":"+key : "";
+  if(id===hlNow) return; hlNow = id;
+  const svg = document.querySelector(".map svg"); if(!svg) return;
+  svg.classList.toggle("hl-on", !!kind);
+  svg.querySelectorAll(".benchg").forEach(g=>{
+    let on = false;
+    if(kind){
+      if(g.classList.contains("catg")) on = g.dataset.kind===kind && (kind==="stage" ? g.dataset.key.split(",").some(c=>key.split(",").includes(c)) : g.dataset.key===key);
+      else { const m = matches.find(x=>x.no===+g.dataset.match); on = !!m && benchMatchHit(m, kind, key); }
+    }
+    g.classList.toggle("hl", on);
+  });
+}
+function hlTarget(el){
+  if(!el || !el.closest) return null;
+  let t;
+  if((t=el.closest("[data-pin]"))) return ["venue", t.dataset.pin];
+  if((t=el.closest("svg .catg"))) return [t.dataset.kind, t.dataset.key];
+  if((t=el.closest("#venueChips [data-venue], .vlink[data-venue]"))) return ["venue", t.dataset.venue];
+  if((t=el.closest("[data-vcard]"))) return ["venue", t.dataset.vcard];
+  if((t=el.closest("#teamChips [data-team], .team[data-team]"))) return ["team", t.dataset.team];
+  if((t=el.closest("#dateChips [data-date]"))) return ["date", t.dataset.date];
+  if((t=el.closest("#stageChips [data-stagepick]"))) return ["stage", t.dataset.stagepick];
+  if((t=el.closest(".stage[data-stage]"))) return ["stage", STRIP_TO[t.dataset.stage].join(",")];
+  return null;
+}
+function hlFrom(e){ const t = hlTarget(e.target); t ? benchHL(t[0], t[1]) : benchHL("", ""); }
+document.addEventListener("mouseover", hlFrom);
+document.addEventListener("focusin", hlFrom);
+document.documentElement.addEventListener("mouseleave", ()=>benchHL("", ""));
+
 $("#out").addEventListener("click",e=>{
   const cg=e.target.closest("svg .catg"); if(cg){ toggleBenchFilter(cg); return; }
   const bg=e.target.closest("svg .benchg"); if(bg){ setFocusVenue(bg.dataset.city, +bg.dataset.match); const d=$("#vdetail"); if(d && narrow()) d.scrollIntoView({block:"nearest",behavior:"smooth"}); return; }
