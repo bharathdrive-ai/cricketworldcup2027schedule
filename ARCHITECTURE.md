@@ -86,7 +86,7 @@ Each visitor's choices are kept only in their own browser (`localStorage`) and a
 | Key | Holds |
 | --- | --- |
 | `cwc27v2` | Selected teams, venues, dates, stages, date range, head-to-head, view, open tab |
-| `cwc27theme` | `light` (Cloudy), `dark` (Dark Hours), `green` (Misty Dew) or `sunset` (Mid Hot / Sunny) |
+| `cwc27theme` | `light` (Cloudy), `dark` (Day Night), `green` (Misty Dew) or `sunset` (Hot Day) |
 | `cwc27wave` | Crowd wave on or off |
 
 ## User flow
@@ -196,7 +196,7 @@ The design aims for zero infrastructure and readability at every screen size. Th
 | --- | --- |
 | Responsiveness | Breakpoints at 760 px and 420 px. Below 760 px: phone label positions, larger tap targets, and 16 px inputs so iOS does not zoom. Below 420 px: the theme switch fills the width. Checked at 327, 375, 1024 and 1280 px with no sideways scrolling. |
 | Map legibility | Venue labels have separate desktop and phone positions. Close pins (Johannesburg/Centurion, Paarl) are nudged apart. A measured fit keeps every bench label inside its bench. |
-| Themes and contrast | Four themes: Cloudy, Dark Hours (default), Misty Dew and Mid Hot / Sunny. Text contrast is at least 4.5:1 and map symbol contrast at least 3:1. |
+| Themes and contrast | Four themes: Cloudy, Day Night (default), Misty Dew and Hot Day. Text contrast is at least 4.5:1 and map symbol contrast at least 3:1. |
 | Accessibility | Pins, benches and chips are buttons with `aria-label` and `aria-pressed`. Enter and Space work, and focus outlines are visible. Animations and transitions stop when the device asks for reduced motion. |
 | Performance | One HTML request plus web fonts, with no frameworks. Benches are plain SVG paths, the crowd wave is one rotating shape, and the map redraws only when the state changes. |
 | Privacy | No accounts, analytics, cookies or server calls. Selections stay in the visitor's own browser. |
