@@ -341,10 +341,18 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .note a{color:var(--accent)}
 @media (prefers-reduced-motion:no-preference){.match,.chip{transition:box-shadow .15s,opacity .15s}}
 /* ---- Ask the schedule: CAG chat agent (answers from the schedule PDF via /api/ask) ---- */
-.askfab{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;align-items:center;gap:8px;padding:12px 18px;border-radius:999px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);font:700 15px/1 var(--font-body);cursor:pointer;box-shadow:0 6px 22px rgba(0,0,0,.28)}
-.askfab:hover{filter:brightness(1.08)}.askfab:focus-visible{outline:3px solid var(--fg);outline-offset:3px}
-.askfab svg{width:20px;height:20px;flex:none}
-.askpanel{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:61;width:min(410px,calc(100vw - 36px));height:min(600px,calc(100vh - 110px));display:flex;flex-direction:column;background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px rgba(0,0,0,.35);overflow:hidden}
+:root{--askw:390px}
+.askbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 13px;border-radius:99px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);font:700 13px var(--font-body);cursor:pointer;white-space:nowrap}
+.askbtn svg{width:16px;height:16px;flex:none}
+.askbtn[aria-expanded="true"]{background:var(--accent-soft);color:var(--fg)}
+.askbtn:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+/* narrower screens: an inline section under the filter bar, in the page flow */
+.askpanel{display:flex;flex-direction:column;height:min(70vh,560px);margin-top:14px;scroll-margin-top:var(--barh,100px);background:var(--surface);color:var(--fg);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+/* wide screens: a full-height column on the right; the page narrows to make room for it */
+@media (min-width:1100px){
+  html.ask-open body{padding-right:var(--askw)}
+  .askpanel{position:fixed;top:0;right:0;bottom:0;width:var(--askw);height:auto;margin:0;border-radius:0;border-width:0 0 0 1px;z-index:20;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+}
 .askhead{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--accent-soft);border-bottom:1px solid var(--line)}
 .askhead h2{margin:0;font:800 20px/1.1 var(--font-display);letter-spacing:.04em;text-transform:uppercase}
 .askhead p{margin:3px 0 0;font-size:12px;color:var(--muted)}.askhead a{color:var(--accent)}
@@ -370,11 +378,7 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .askform textarea:focus{outline:2px solid var(--accent);outline-offset:0}
 .askform button{flex:none;padding:0 16px;border-radius:10px;border:0;background:var(--accent);color:var(--surface);font:700 14px var(--font-body);cursor:pointer}
 .askform button:disabled{opacity:.5;cursor:default}
-@media (max-width:760px){
-  .askfab{right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));padding:11px 15px}
-  .askpanel{right:0;left:0;bottom:0;width:auto;height:min(82vh,640px);border-radius:16px 16px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
-  .askform textarea{font-size:16px}
-}
+@media (max-width:760px){.askpanel{height:min(75vh,560px)}.askform textarea{font-size:16px}}
 </style>
 <script>var t="dark";try{t=localStorage.getItem("cwc27theme")||"dark"}catch(e){}if(t==="light"||t==="dark"||t==="green"||t==="sunset")document.documentElement.setAttribute("data-theme",t)</script>
 </head>
@@ -1161,11 +1165,11 @@ $("#themeSwitch").onclick=e=>{const b=e.target.closest("[data-theme-opt]"); if(b
 render();
 </script>
 <!-- Ask the schedule: a CAG chat agent. The Vercel function /api/ask answers from CWC2027_Schedule_Reference.pdf -->
-<button class="askfab" id="askFab" type="button" aria-haspopup="dialog" aria-controls="askPanel" hidden>
+<button class="askbtn" id="askFab" type="button" aria-expanded="false" aria-controls="askPanel" hidden>
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M9 10h6M9 14h4"/></svg>
   Ask the schedule
 </button>
-<section class="askpanel" id="askPanel" role="dialog" aria-modal="false" aria-labelledby="askTitle" hidden>
+<section class="askpanel" id="askPanel" role="complementary" aria-labelledby="askTitle" hidden>
   <div class="askhead">
     <div><h2 id="askTitle">Ask the schedule</h2>
       <p>Answers come only from the <a href="CWC2027_Schedule_Reference.pdf" target="_blank" rel="noopener">schedule PDF</a> (cache-augmented generation with Gemini). Check important details.</p></div>
@@ -1175,7 +1179,7 @@ render();
   <div class="asksugg" id="askSugg"></div>
   <form class="askform" id="askForm">
     <label for="askInput" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Your question</label>
-    <textarea id="askInput" rows="1" maxlength="500" placeholder="e.g. When does India play Pakistan?"></textarea>
+    <textarea id="askInput" rows="1" maxlength="500" placeholder="Type a question…"></textarea>
     <button type="submit" id="askSend">Ask</button>
   </form>
 </section>
@@ -1187,6 +1191,8 @@ render();
             : host === "bharathdrive-ai.github.io" ? "https://cricketworldcup2027schedule.vercel.app/api/ask" : "";
   if(!API) return;
   const fab = $("#askFab"), panel = $("#askPanel"), log = $("#askLog"), form = $("#askForm"), input = $("#askInput"), send = $("#askSend"), sugg = $("#askSugg");
+  // in the page flow: the button sits in the filter bar, the panel under it (or docked right on wide screens)
+  const bar = $(".controls"); bar.querySelector(".seg").after(fab); bar.after(panel);
   const SUGGEST = ["When and where is the final?", "When does India play Pakistan?", "Which matches are in Durban?", "What is the Super 7 stage?"];
   const history = []; let busy = false;
   // show the button only once the server has its Gemini key
@@ -1214,11 +1220,13 @@ render();
   }
   function showSugg(){ sugg.innerHTML = history.length ? "" : SUGGEST.map(s => `<button type="button">${escH(s)}</button>`).join(""); }
   function open(){
-    panel.hidden = false; fab.hidden = true;
+    panel.hidden = false; fab.setAttribute("aria-expanded", "true"); document.documentElement.classList.add("ask-open");
     if(!log.children.length) add("bot", "<p>Hi! Ask me anything about the <b>2027 World Cup schedule</b>: fixtures, dates, venues, stages or start times. I answer only from the schedule document.</p>");
-    showSugg(); input.focus();
+    showSugg(); input.focus({preventScroll:true});
+    // inline (not docked): bring the whole panel into view just under the sticky filter bar
+    if(getComputedStyle(panel).position !== "fixed"){ document.documentElement.style.setProperty("--barh", (getComputedStyle(bar).position === "sticky" ? bar.offsetHeight + 8 : 8) + "px"); panel.scrollIntoView({block:"start"}); }
   }
-  function close(){ panel.hidden = true; fab.hidden = false; fab.focus(); }
+  function close(){ panel.hidden = true; fab.setAttribute("aria-expanded", "false"); document.documentElement.classList.remove("ask-open"); fab.focus(); }
   async function ask(q){
     q = q.trim(); if(!q || busy) return;
     busy = true; send.disabled = true; input.value = ""; sugg.innerHTML = "";
@@ -1235,12 +1243,12 @@ render();
     }
     busy = false; send.disabled = false; log.scrollTop = log.scrollHeight; input.focus();
   }
-  fab.onclick = open; $("#askClose").onclick = close;
+  fab.onclick = () => panel.hidden ? open() : close(); $("#askClose").onclick = close;
   panel.addEventListener("keydown", e => { if(e.key === "Escape") close(); });
   form.onsubmit = e => { e.preventDefault(); ask(input.value); };
   input.addEventListener("keydown", e => { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); ask(input.value); } });
   sugg.onclick = e => { const b = e.target.closest("button"); if(b) ask(b.textContent); };
-  log.onclick = e => { const b = e.target.closest("[data-askmatch]"); if(!b) return; if(narrow()) close(); goToMatch(+b.dataset.askmatch); };
+  log.onclick = e => { const b = e.target.closest("[data-askmatch]"); if(!b) return; goToMatch(+b.dataset.askmatch); };
 })();
 </script>
 </body>
