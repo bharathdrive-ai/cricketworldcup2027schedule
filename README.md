@@ -28,6 +28,7 @@ The **Ask the schedule** button opens a chat assistant that answers questions ab
 
 - Runs on Vercel; the GitHub Pages copy calls the Vercel endpoint. The button appears only when the function has a key.
 - Needs the Vercel environment variable `GOOGLE_API_KEY` (optional `GEMINI_MODELS`, default `gemini-3.5-flash-lite,gemini-3.6-flash`).
+- In answers, venue names (city, stadium or alternative name) link to that venue on the map, and match numbers link to the fixture in the list.
 - Limits: 500-character questions, the last 6 messages as context, and 8 questions a minute per visitor.
 - After changing a fixture, rebuild the PDF with [`tools/build-pdf.js`](tools/build-pdf.js) so the assistant stays in step with the site.
 
