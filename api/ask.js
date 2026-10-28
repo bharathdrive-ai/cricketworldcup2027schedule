@@ -7,7 +7,7 @@ const path = require("path");
 
 const PDF_NAME = "CWC2027_Schedule_Reference.pdf";
 const MODELS = (process.env.GEMINI_MODELS || "gemini-3.5-flash-lite,gemini-3.6-flash").split(",").map(s => s.trim()).filter(Boolean);
-const ORIGINS = ["https://bharathdrive-ai.github.io", "https://cricketworldcup2027schedule.vercel.app"];
+const ORIGINS = ["https://bharathdrive-ai.github.io", "https://cricketworldcup2027schedule.vercel.app", "https://talent-hunt.net", "https://www.talent-hunt.net"];
 const MAX_QUESTION = 500;     // characters
 const HISTORY_TURNS = 6;      // earlier messages sent along for follow-up questions
 const RATE = { windowMs: 60_000, max: 8 };  // per IP, per warm instance (best effort)

@@ -1263,9 +1263,10 @@ render();
 </section>
 <script>
 (function(){
-  // the agent runs as a Vercel function; GitHub Pages calls the Vercel copy, other hosts (e.g. the artifact preview) hide it
+  // the agent runs as a Vercel function (also served on the custom domain talent-hunt.net); GitHub Pages calls the
+  // Vercel copy, other hosts (e.g. the artifact preview) hide it
   const host = location.hostname;
-  const API = /(^|\.)vercel\.app$|^localhost$|^127\.0\.0\.1$/.test(host) ? "/api/ask"
+  const API = /(^|\.)vercel\.app$|^(www\.)?talent-hunt\.net$|^localhost$|^127\.0\.0\.1$/.test(host) ? "/api/ask"
             : host === "bharathdrive-ai.github.io" ? "https://cricketworldcup2027schedule.vercel.app/api/ask" : "";
   if(!API) return;
   const fab = $("#askFab"), panel = $("#askPanel"), log = $("#askLog"), form = $("#askForm"), input = $("#askInput"), send = $("#askSend"), sugg = $("#askSugg");
