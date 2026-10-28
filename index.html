@@ -215,15 +215,19 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 /* venues */
 .venues{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;padding-top:18px}
 .venue{background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:14px;display:flex;flex-direction:column;gap:8px}
-.venue h3{font-size:24px;text-transform:uppercase}
+.venue h3,.vdetail h3{font-size:26px;text-transform:uppercase}
 .venue .meta{font-size:13px;color:var(--muted)}
 .venue .flag{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .venue ol{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:4px;font-size:13px}
 .venue li{display:grid;grid-template-columns:54px minmax(0,1fr);gap:8px;padding-left:6px;border-left:3px solid var(--sv)}
-.venue li .mono{color:var(--muted);font-size:12px}
+/* venue cards and detail panel share these: grey 13px details, numbers in the body font with even-width digits */
+.venue .num,.vdetail .num{font-variant-numeric:tabular-nums;font-weight:600;color:var(--fg)}
+.venue li .d,.vdetail li .d{color:var(--muted);font-variant-numeric:tabular-nums}
+.vdetail li.nomatch{display:block;color:var(--muted);border-left-color:var(--line)}
 .bar{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--accent)}
-.venue.dim{opacity:.35}
+.venue.dim{background:transparent;border-style:dashed}
+.venue.dim h3{color:var(--muted)}
 
 /* map */
 .mapwrap{display:grid;grid-template-columns:minmax(0,2.4fr) minmax(0,1fr);gap:16px;padding-top:18px;align-items:start}
@@ -317,13 +321,11 @@ details.explain ul{margin:8px 0 0;padding-left:20px;max-width:70ch}
 .lg-dot{background:var(--pin)} .lg-sel{background:var(--pin-sel)} .lg-none{border:1.5px solid var(--muted)}
 .legend .lg-route{width:18px;height:0;border-radius:0;border-top:2px dashed var(--route)}
 .vdetail{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:16px;display:flex;flex-direction:column;gap:8px;position:sticky;top:90px}
-.vdetail h3{font-size:30px;text-transform:uppercase}
 .vdetail .meta,.vdetail p{margin:0;font-size:13px;color:var(--muted)}
 .vdetail .flag{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .vdetail .opt{align-self:flex-start}
 .vdetail ol{list-style:none;margin:4px 0 0;padding:0;display:grid;gap:4px;font-size:13px;max-height:360px;overflow:auto}
 .vdetail li{display:grid;grid-template-columns:54px minmax(0,1fr);gap:8px;padding-left:6px;border-left:3px solid var(--sv,var(--line))}
-.vdetail li .mono{color:var(--muted);font-size:12px}
 .venue{cursor:pointer}
 .venue.sel{border-color:var(--ko);box-shadow:0 0 0 1px var(--ko)}
 @media (max-width:760px){.mapwrap{grid-template-columns:1fr}.vdetail{position:static}}
@@ -1007,9 +1009,9 @@ function detailHTML(list){
   }
   const v=VENUES[c], ms=list.filter(m=>m.city===c), all=matches.filter(m=>m.city===c).length;
   return `${card}<span class="flag">${v.country}</span><h3>${esc(c)}</h3>
-    <p class="meta">${esc(v.stadium)}${v.alt?` · ${esc(v.alt)}`:""} · capacity <span class="mono">${v.cap.toLocaleString("en-GB")}</span><br>${ms.length} of ${all} matches shown</p>
+    <p class="meta">${esc(v.stadium)}${v.alt?` · ${esc(v.alt)}`:""} · capacity <span class="num">${v.cap.toLocaleString("en-GB")}</span><br>${ms.length} of ${all} matches shown</p>
     <button class="opt" data-pin="${esc(c)}" aria-pressed="${state.venues.has(c)}">${state.venues.has(c)?"Remove from selection":"Select this venue"}</button>
-    <ol>${ms.map(m=>`<li class="s-${m.cls}"><span class="mono">${m.date.getUTCDate()} ${fmtMon(m.date)}</span><span>${esc(short(m.home))} v ${esc(short(m.away))} · ${m.time}${m.dn?" D/N":""}</span></li>`).join("")||"<li>No matches in the current selection.</li>"}</ol>`;
+    <ol>${ms.map(m=>`<li class="s-${m.cls}"><span class="d">${m.date.getUTCDate()} ${fmtMon(m.date)}</span><span>${esc(short(m.home))} v ${esc(short(m.away))} · ${m.time}${m.dn?" D/N":""}</span></li>`).join("")||"<li class=\"nomatch\">No matches in the current selection.</li>"}</ol>`;
 }
 
 function renderVenues(list){
@@ -1021,9 +1023,9 @@ function renderVenues(list){
     return `<div class="venue${ms.length?"":" dim"}${state.venues.has(c)?" sel":""}" data-vcard="${esc(c)}">
       <span class="flag">${v.country}</span>
       <h3>${esc(c)}</h3>
-      <div class="meta">${esc(v.stadium)}${v.alt?` · ${esc(v.alt)}`:""}<br>Capacity <span class="mono">${v.cap.toLocaleString("en-GB")}</span> · ${ms.length} of ${all} match${all>1?"es":""} shown</div>
+      <div class="meta">${esc(v.stadium)}${v.alt?` · ${esc(v.alt)}`:""}<br>Capacity <span class="num">${v.cap.toLocaleString("en-GB")}</span> · ${ms.length} of ${all} match${all>1?"es":""} shown</div>
       <div class="bar" title="Capacity relative to the Wanderers"><i style="width:${v.cap/max*100}%"></i></div>
-      <ol>${ms.map(m=>`<li class="s-${m.cls}"><span class="mono">${m.date.getUTCDate()} ${fmtMon(m.date)}</span><span>${esc(short(m.home))} v ${esc(short(m.away))}${m.dn?" · D/N":""}</span></li>`).join("")}</ol>
+      <ol>${ms.map(m=>`<li class="s-${m.cls}"><span class="d">${m.date.getUTCDate()} ${fmtMon(m.date)}</span><span>${esc(short(m.home))} v ${esc(short(m.away))}${m.dn?" · D/N":""}</span></li>`).join("")}</ol>
     </div>`;}).join("")}</div>`;
 }
 function renderTeamPanel(){
