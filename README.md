@@ -4,7 +4,7 @@ An interactive schedule for the ICC Men's Cricket World Cup 2027 (2 October – 
 
 > **Unofficial fan site.** Not affiliated with, endorsed by or connected to the International Cricket Council (ICC). Tournament names and marks belong to their owners. The site icon is an original design.
 
-**Live site:** https://bharathdrive-ai.github.io/cricketworldcup2027schedule/ (also on Vercel: https://cricketworldcup2027schedule.vercel.app)
+**Live site:** https://www.talent-hunt.net (also on GitHub Pages: https://bharathdrive-ai.github.io/cricketworldcup2027schedule/ and Vercel: https://cricketworldcup2027schedule.vercel.app)
 
 ## Features
 

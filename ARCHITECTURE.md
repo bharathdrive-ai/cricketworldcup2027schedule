@@ -10,6 +10,7 @@ It shows the 57 fixtures of the ICC Men's Cricket World Cup 2027 (South Africa, 
 
 | Item | Value |
 | --- | --- |
+| Live (custom domain) | https://www.talent-hunt.net (talent-hunt.net redirects here; DNS at GoDaddy → Vercel) |
 | Live (GitHub Pages) | https://bharathdrive-ai.github.io/cricketworldcup2027schedule/ |
 | Live (Vercel) | https://cricketworldcup2027schedule.vercel.app |
 | Source | https://github.com/bharathdrive-ai/cricketworldcup2027schedule, branch `main` |
